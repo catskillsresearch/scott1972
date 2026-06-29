@@ -13,3 +13,6 @@ arxiv.tex
 arxiv.pdf
 lean-listings/
 figures/
+
+dist/
+00README.json

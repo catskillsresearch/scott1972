@@ -1096,6 +1096,7 @@ lake exe cache get
 lake build Scott1972
 bash scripts/generate_arxiv_with_code.sh   # optional: arxiv_with_code.md (gitignored)
 bash scripts/build_arxiv_tex.sh            # optional: arxiv.tex + lean-listings/ (gitignored)
+bash scripts/package_arxiv_submit.sh       # optional: dist/arxiv_submit.zip (gitignored)
 ```
 
 ---
