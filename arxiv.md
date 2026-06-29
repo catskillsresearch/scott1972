@@ -803,15 +803,15 @@ bare `.le` coercions and `show` re-statements rather than `Set.mem_setOf` rewrit
 
 With `e : X → Y` a subspace embedding and `i, j : D ⇄ D'` a projection on the *range*, if continuous
 `f : X → D` and `g : X → D'` satisfy `f = j ∘ g`, then their maximal extensions (3.8) satisfy
-`f̄ = j ∘ ḡ`. This is the key compatibility used to build inverse limits (§4: `f̄ₙ = jₙ ∘ f̄ₙ₊₁`).
+$\bar{f} = j \circ \bar{g}$. This is the key compatibility used to build inverse limits (§4: $\bar{f}_n = j_n \circ \bar{f}_{n+1}$).
 The proof is a clean two-inequality sandwich, exactly Scott's:
 
-- `j ∘ ḡ ⊑ f̄`: `j ∘ ḡ` is continuous and `(j ∘ ḡ) ∘ e = j ∘ g = f`, so the *equality* maximality of
-  `f̄` (`scottExtend_maximal`) applies.
-- `i ∘ f̄ ⊑ ḡ`: `(i ∘ f̄) ∘ e = i ∘ f = i ∘ j ∘ g ⊑ g` (using `i ∘ j ⊑ id`), so the *sub-solution*
+- $j \circ \bar{g} \sqsubseteq \bar{f}$: $j \circ \bar{g}$ is continuous and $(j \circ \bar{g}) \circ e = j \circ g = f$, so the *equality* maximality of
+  $\bar{f}$ (`scottExtend_maximal`) applies.
+- $i \circ \bar{f} \sqsubseteq \bar{g}$: $(i \circ \bar{f}) \circ e = i \circ f = i \circ j \circ g \sqsubseteq g$ (using $i \circ j \sqsubseteq \mathrm{id}$), so the *sub-solution*
   maximality `scottExtend_maximal_le` (the remark after 3.8, added here as the `≤`-analogue of
   `scottExtend_maximal` — identical proof, final `=` weakened to `≤`) applies.
-- combine: `f̄ = j ∘ i ∘ f̄ ⊑ j ∘ ḡ ⊑ f̄` (apply monotone `j` to the second bound, and `j ∘ i = id`).
+- combine: $\bar{f} = j \circ i \circ \bar{f} \sqsubseteq j \circ \bar{g} \sqsubseteq \bar{f}$ (apply monotone $j$ to the second bound, and $j \circ i = \mathrm{id}$).
 
 **Engineering notes / lessons from 3.9:** the lemma lives in `Theorem212.lean` because it is the
 only module importing *both* `scottExtend` (Constructions) and `IsContinuousLatticeProjection`
@@ -1096,6 +1096,7 @@ lake exe cache get
 lake build Scott1972
 bash scripts/generate_arxiv_with_code.sh   # optional: arxiv_with_code.md (gitignored)
 bash scripts/build_arxiv_tex.sh            # optional: arxiv.tex + lean-listings/ (gitignored)
+bash scripts/build_arxiv_pdf.sh            # arxiv.pdf (LuaLaTeX; tracked in repo)
 bash scripts/package_arxiv_submit.sh       # optional: dist/arxiv_submit.zip (gitignored)
 ```
 
