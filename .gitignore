@@ -1,0 +1,20 @@
+# cache and other artifacts produced by Lean's Lake build tool
+.lake/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Vision OCR venv and page PNGs (large; regenerate with scripts/ocr_pdf_pipeline.py)
+.venv-ocr/
+sources/pages/
+sources/ocr_*.log
+
+# LaTeX build artifacts (the .tex/.pdf deliverables are kept)
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.toc
+texput.log

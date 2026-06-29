@@ -1,0 +1,16 @@
+name = "scott1972"
+version = "0.1.0"
+keywords = ["domain-theory", "scott-1972", "continuous-lattices", "lean4"]
+defaultTargets = ["Scott1972"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = true
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.30.0"
+
+[[lean_lib]]
+name = "Scott1972"
