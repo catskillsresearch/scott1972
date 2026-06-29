@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate arxiv.tex and compile arxiv.pdf (tracked in the repo).
+# Regenerate arxiv.tex, compile arxiv.pdf (tracked), and dist/arxiv_submit.zip.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,3 +18,6 @@ latexmk -interaction=nonstopmode -halt-on-error "$TEX" >/dev/null 2>&1 || {
   exit 1
 }
 echo "wrote $PDF ($(du -h "$PDF" | cut -f1))"
+
+echo "==> Packaging arXiv submission zip"
+bash scripts/package_arxiv_submit.sh --skip-tex-build

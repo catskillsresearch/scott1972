@@ -5,25 +5,25 @@
 ## Abstract
 
 We present a complete machine-checked formalization of Dana Scott's landmark 1972 paper
-*Continuous Lattices* (LNM 274), carried out in Lean 4 against mathlib and including the March
-1972 Milner correction (pp. 135–136).
+*Continuous Lattices* **[Sco72]**, carried out in Lean 4 against mathlib and including the March
+1972 Milner correction in **[Sco72]** (pp. 135--136).
 
-Scott's paper develops domain theory from a topological starting point. He defines *injective*
-$T_0$-spaces—those with a strong extension property for continuous maps—and shows that they are
+Scott's paper develops a model for $\lambda$-calculus from a topological starting point. He defines *injective*
+$T_0$-spaces---those with a strong extension property for continuous maps---and shows that they are
 exactly the *continuous lattices*: complete lattices whose Scott topology is determined by the
 order via the way-below relation ($\ll$). On this foundation he studies projections, retractions,
 products, function spaces, and inverse limits. The capstone (Theorem 4.4) constructs an inverse
 limit $D_\infty$ of function-space approximants and proves $D_\infty \cong [D_\infty \to D_\infty]$,
 yielding a purely mathematical model for Church's untyped $\lambda$-calculus.
 
-Our development formalizes **43 numbered results** from Scott's §1–§4 (Propositions, Corollaries,
+Our development formalizes **43 numbered results** from Scott's Sections 1--4 (Propositions, Corollaries,
 Lemmas, and Theorems), each as a sorry-free Lean theorem, together with supporting infrastructure
-(step functions, the `↟a` basis of Scott opens, Milner's coarser-than-Scott hypothesis, the
+(step functions, the $\Uparrow a$ basis of Scott opens, Milner's coarser-than-Scott hypothesis, the
 function-space tower, and the $i_\infty$/$j_\infty$ pair). The formalization is **classical**
 (uses `Classical.choice` transitively) and follows Scott's proof dependency order. Where the Lean
-proof required choices not visible in the original—or where dead ends were encountered—we record
-detailed notes in §5. All proofs check with the standard footprint `[propext, Classical.choice,
-Quot.sound]`.
+proof required choices not visible in the original---or where dead ends were encountered---we record
+detailed notes in Section 5. All proofs check with the standard footprint
+$\texttt{[propext, Classical.choice, Quot.sound]}$.
 
 ---
 
@@ -41,7 +41,7 @@ Three factors frame the breakthrough:
 In the late 1960s Dana Scott worked alongside Christopher Strachey at Oxford. Scott was a skeptic
 of Alonzo Church's untyped $\lambda$-calculus. He believed programming languages should be strictly
 typed and argued that the untyped calculus lacked a legitimate mathematical foundation. He
-began developing domain theory specifically to provide a denotational semantics for *typed* languages.
+began developing a model for $\lambda$-calculus specifically to provide a denotational semantics for *typed* languages.
 
 ### The discovery of $D_\infty$ (1969)
 
@@ -82,7 +82,7 @@ published text.
 
 ## 2. Scott's *Continuous Lattices*
 
-**[Sco72]** develops domain theory from injective $T_0$-spaces. Scott's own abstract states the
+**[Sco72]** develops a model for $\lambda$-calculus from injective $T_0$-spaces. Scott's own abstract states the
 arc of the paper: starting topologically, he introduces spaces with a strong extension property for
 continuous maps; shows they are exactly the continuous lattices—complete lattices whose topology is
 the Scott topology determined by the order; studies projections, subspaces, embeddings, products,
@@ -100,7 +100,7 @@ Scott organizes the paper in four technical sections (following an introductory 
 | §4 | **Inverse limits** | $D_\infty$ as inverse/direct limit; capstone $D_\infty \cong [D_\infty \to D_\infty]$ (Thm. 4.4) |
 
 Our working source text is [`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md): a plain-text OCR
-transcription of the LNM 274 PDF through the Milner correction (pp. 135–136). Image-based PDFs are
+transcription of **[Sco72]** through the Milner correction (pp. 135–136). Image-based PDFs are
 poor inputs for mechanized proof development; this file gives the formalization a reliable, searchable
 text to quote against. (An earlier filename suffix `_vision` reflected the OCR toolchain only and
 has been dropped to avoid confusion with the published paper.)
@@ -1087,39 +1087,60 @@ composition identities (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`
 
 **Inventory source of truth:** this file (`arxiv.md`). Do not use generated `arxiv_with_code.md`
 or `arxiv.tex` (they inline Lean sources and mermaid figures for review/PDF packaging and are
-stale whenever older than `arxiv.md`).
+stale whenever older than `arxiv.md` or any listed `.lean` file).
 
 The repository pins Lean / mathlib **v4.30.0** (`lean-toolchain`).
 
 ```bash
 lake exe cache get
 lake build Scott1972
-bash scripts/generate_arxiv_with_code.sh   # optional: arxiv_with_code.md (gitignored)
-bash scripts/build_arxiv_tex.sh            # optional: arxiv.tex + lean-listings/ (gitignored)
-bash scripts/build_arxiv_pdf.sh            # arxiv.pdf (LuaLaTeX; tracked in repo)
-bash scripts/package_arxiv_submit.sh       # optional: dist/arxiv_submit.zip (gitignored)
+bash scripts/generate_arxiv_with_code.sh   # → arxiv_with_code.md (gitignored)
+bash scripts/build_arxiv_tex.sh            # → arxiv.tex + lean-listings/ + figures/ (gitignored)
+bash scripts/build_arxiv_pdf.sh            # → arxiv.pdf (LuaLaTeX; tracked) + dist/arxiv_submit.zip
+bash scripts/package_arxiv_submit.sh       # → dist/arxiv_submit.zip only (skips PDF)
 ```
 
 ---
 
-## Appendix A. Lean source index
+## Acknowledgments
 
-| File | Role |
-| --- | --- |
-| `Scott1972.lean` | Root import graph |
-| `Scott1972/ContinuousLattice/Injective.lean` | Scott §1 |
-| `Scott1972/ContinuousLattice/WayBelow.lean` | Scott §2 |
-| `Scott1972/ContinuousLattice/Specialization.lean` | Scott §2 |
-| `Scott1972/ContinuousLattice/ScottMaps.lean` | Scott §2 |
-| `Scott1972/ContinuousLattice/MilnerCorrection.lean` | March 1972 correction |
-| `Scott1972/ContinuousLattice/Constructions.lean` | Scott §2.8–2.12 |
-| `Scott1972/ContinuousLattice/FunctionSpaces.lean` | Scott §3 |
-| `Scott1972/ContinuousLattice/Theorem212.lean` | Theorem 2.12 |
-| `Scott1972/ContinuousLattice/InverseLimits.lean` | Scott §4 |
-| `Scott1972/ContinuousLattice/FunctionSpaceTower.lean` | Theorem 4.4 |
+- **Dana Scott** — *Continuous Lattices* **[Sco72]**, the paper this development formalizes.
+- **Robin Milner** — the March 1972 correction to **[Sco72]**, without which Propositions 2.9, 2.10,
+  and 3.3 would be wrong as originally stated.
 
-Primary source (OCR plain text): [`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md) —
-transcription of **[Sco72]** for use in the Lean development (see §2).
+### AI-assisted development
+
+The human author retains sole responsibility for the mathematical content, the choice of
+formalization route, and every formal claim in this work. Following standard publisher practice
+(e.g., COPE guidance on authorship and AI tools **[COPE24]**), **no large language model is listed
+as a co-author** — authorship implies an accountability that automated systems cannot bear.
+
+We gratefully acknowledge assistance from the following tools:
+
+- **Cursor** **[Cur26]** — agent-assisted editing in the Cursor IDE: formalizing Scott's 1972
+  continuous-lattice layer in Lean 4 / mathlib, `lake build` repair, vision-OCR transcription,
+  drafting this narrative (`arxiv.md`), and tracking the formalized inventory. Generated Lean was
+  provisional until it compiled under the pinned toolchain.
+- **Cursor Composer 2.5 Fast** **[Cmp25]** — routine multi-step work: module scaffolding,
+  dependency-ordered wiring of `Scott1972/ContinuousLattice/`, documentation and Mermaid
+  blueprints, and medium proof obligations where the strategy was already fixed. Per its model
+  card, Composer 2.5 is optimized for codebase navigation rather than open-ended topological proof
+  design; the Milner-block results (2.9–2.11, full 3.3) were not delegated to it alone.
+- **Anthropic Claude Opus 4.8 (high reasoning)** **[Ant26]** — selective use for the heaviest proof
+  work (Propositions 2.9–2.11, Theorem 2.12, Theorem 3.3, Propositions 3.8–3.10, Theorem 4.4).
+  Every emitted proof term was checked by the Lean kernel.
+- **Google Gemini 3.5 Flash** **[Gem25]** — exploratory passes on Scott's typographic conventions
+  (ambient vs subspace joins in the Milner correction) and scope decisions.
+
+All definitions, constructivity audits, and final prose were reviewed by the human author, who takes
+full responsibility for them.
+
+### Artifact availability
+
+The development **[SR72]** is at
+[`github.com/catskillsresearch/scott1972`](https://github.com/catskillsresearch/scott1972).
+Run `lake build Scott1972` for the sorry-free formalization; `scripts/generate_arxiv_with_code.sh`
+builds `arxiv_with_code.md` from this file plus the complete Lean source.
 
 ---
 
@@ -1128,5 +1149,11 @@ transcription of **[Sco72]** for use in the Lean development (see §2).
 - **[Sco69]** D. S. Scott. *Lattice-theoretic models for the $\lambda$-calculus* (unpublished manuscript). University of Oxford, 1969.
 - **[Sco70]** D. S. Scott. Outline of a mathematical theory of computation. In *Proceedings of the Fourth Annual Princeton Conference on Information Sciences and Systems* (pp. 169–176). Princeton University, 1970.
 - **[Sco72]** D. S. Scott. Continuous lattices. In F. W. Lawvere (Ed.), *Toposes, Algebraic Geometry and Logic* (Lecture Notes in Mathematics, Vol. 274, pp. 97–136). Springer, Berlin, Heidelberg, 1972. URL: http://upol.cz
-- **[GHKLMS03]** Gierz et al. *Continuous Lattices and Domains*. Cambridge, 2003.
-- **[Kel55]** J. L. Kelley. *General Topology*. 1955.
+- **[GHKLMS03]** G. Gierz, K. H. Hofmann, K. Keimel, J. D. Lawson, M. Mislove, and D. S. Scott. *Continuous Lattices and Domains*. Cambridge University Press, 2003.
+- **[Kel55]** J. L. Kelley. *General Topology*. D. Van Nostrand Company, 1955.
+- **[SR72]** Catskills Research. *scott1972* (this work). <https://github.com/catskillsresearch/scott1972>.
+- **[COPE24]** Committee on Publication Ethics (COPE). *Authorship and AI tools: COPE position statement*. 2024. <https://publicationethics.org/guidance/cope-position/authorship-and-ai-tools>
+- **[Cur26]** Anysphere, Inc. *Cursor: AI-native code editor and agent environment*. <https://cursor.com> (accessed 2026).
+- **[Cmp25]** Anysphere, Inc. *Composer 2.5*. Model announcement and documentation, <https://cursor.com/blog/composer-2-5>; model card as integrated in Cursor, <https://cursor.com/docs/models> (accessed 2026).
+- **[Ant26]** Anthropic. *Claude Opus 4.8* (high thinking/reasoning variant). System card and announcement, <https://www.anthropic.com/news/claude-opus-4-8>; model documentation as integrated in Cursor, <https://cursor.com/docs/models/claude-opus-4-8> (accessed 2026).
+- **[Gem25]** Google DeepMind. *Gemini 3.5 Flash*. Technical documentation and model cards. <https://ai.google.dev/gemini-api/docs/models> (accessed 2026).

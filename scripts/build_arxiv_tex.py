@@ -4,10 +4,11 @@ r"""Convert arxiv_with_code.md to arxiv.tex (arXiv-ready).
 Pipeline:
   1. Drop the GitHub-only navigation preamble (auto-gen note, document map, file index).
   2. Lift the `## Abstract` section into a LaTeX \begin{abstract}.
-  3. Demote the Appendix-A structural headings so LaTeX numbers everything once.
+  3. Demote the Appendix-A structural headings so LaTeX numbers everything once, then
+     insert \\appendix before the combined Lean-source appendix.
   4. Strip manual section numbers (any depth, e.g. `1.`, `1.3`, `5.1`) so LaTeX does
      the numbering and we never get duplicates like "5.1 5.1".
-  5. Replace fenced code with \lstinputlisting blocks of the real UTF-8 source.
+  5. Replace fenced code with \\lstinputlisting blocks (ASCII-sanitized for arXiv pdfLaTeX).
   5b. Render ```mermaid blocks to vector PDFs via mermaid-cli (mmdc).
   6. pandoc → LaTeX, then splice the listing/math/figure placeholders back in.
 """
@@ -25,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS))
-from lean_listing_sanitize import chunk_line_ranges
+from lean_listing_sanitize import chunk_line_ranges, sanitize_lean_for_arxiv
 
 SRC = ROOT / "arxiv_with_code.md"
 OUT = ROOT / "arxiv.tex"
@@ -118,7 +119,7 @@ def drop_github_nav(text: str) -> str:
 def normalize_appendix_headings(text: str) -> str:
     text = re.sub(
         r"^#\s+Appendix A: Complete Lean source\s*$",
-        "## Appendix A: Complete Lean source",
+        "## Complete Lean source",
         text,
         flags=re.MULTILINE,
     )
@@ -142,7 +143,7 @@ def extract_abstract(text: str) -> tuple[str, str]:
 
 def write_listing(code: str, listing_name: str) -> tuple[str, int]:
     LISTINGS_DIR.mkdir(parents=True, exist_ok=True)
-    source = code.rstrip("\n")
+    source = sanitize_lean_for_arxiv(code.rstrip("\n"))
     listing_path = LISTINGS_DIR / listing_name
     listing_path.write_text(source + "\n", encoding="utf-8")
     rel_path = listing_path.relative_to(ROOT).as_posix()
@@ -278,7 +279,34 @@ def cleanup_pandoc_latex(latex: str) -> str:
             r"\1",
             latex,
         )
+    latex = re.sub(
+        r"\\section\{Appendix A\. Lean source index\}",
+        "",
+        latex,
+    )
+    latex = re.sub(
+        r"\\section\{Appendix A: Complete Lean source\}",
+        r"\\section{Complete Lean source}",
+        latex,
+    )
     latex = re.sub(r"\n{3,}", "\n\n", latex)
+    return latex
+
+
+def insert_appendix_command(latex: str) -> str:
+    marker = r"\section{Complete Lean source}"
+    if marker not in latex:
+        raise RuntimeError(f"missing {marker!r} in LaTeX output")
+    return latex.replace(marker, r"\appendix" + "\n" + marker, 1)
+
+
+def cleanup_abstract_latex(latex: str) -> str:
+    """Keep the abstract pdfLaTeX/arXiv-safe: ASCII plus standard LaTeX escapes."""
+    latex = latex.replace("\\pandocbounded{", "{")
+    latex = latex.replace("\\textbf{{[}", "\\textbf{[")
+    latex = latex.replace("\\texttt{{[}", "\\texttt{[")
+    latex = latex.replace("{]}}", "]}")
+    latex = re.sub(r"\\begin\{center\}\\rule\{.*?\}\\end\{center\}\s*", "", latex, flags=re.DOTALL)
     return latex
 
 
@@ -339,8 +367,10 @@ def main() -> int:
     latex_body = pandoc_to_latex(body, shift=True)
     latex_body = inject_placeholders(latex_body, placeholders)
     latex_body = cleanup_pandoc_latex(latex_body)
+    latex_body = insert_appendix_command(latex_body)
 
     abstract_latex = pandoc_to_latex(github_math_to_tex(abstract_md), shift=False) if abstract_md else ""
+    abstract_latex = cleanup_abstract_latex(abstract_latex)
 
     preamble = PREAMBLE.read_text(encoding="utf-8")
     title_page = build_title_page(abstract_latex)

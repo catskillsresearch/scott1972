@@ -8,9 +8,13 @@ readable ASCII and drop anything still non-ASCII to `?` rather than break the bu
 
 from __future__ import annotations
 
+import unicodedata
+
 # Order matters: longer / composite replacements first where needed.
 LEAN_UNICODE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
-    # multi-codepoint-ish first
+    # Composites (including combining-mark spellings used in docstrings)
+    ("⋢", " sqsubneq "),
+    ("⊑\u0338", " sqsubneq "),
     ("⁻¹", "^-1"),
     ("⟶", " --> "),
     ("⟷", " <-> "),
@@ -51,6 +55,21 @@ LEAN_UNICODE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     ("≤", " <= "),
     ("≥", " >= "),
     ("≅", " ~= "),
+    ("≪", " << "),
+    ("⊑", " sqsub "),
+    ("⊔", " sqsup "),
+    ("⊓", " sqcap "),
+    ("⊤", " top "),
+    ("⊣", " dashv "),
+    ("↟", " Up "),
+    ("⇄", " <=> "),
+    ("⨆", " bigcup "),
+    ("𝕆", " O "),
+    ("∞", " inf "),
+    ("′", "'"),
+    ("ḡ", "g"),
+    ("̄", ""),  # combining macron (often after explicit pairs above)
+    ("̸", ""),  # combining long slash overlay
     # arrows / misc operators
     ("↑", ""),
     ("↓", ""),
@@ -125,6 +144,8 @@ def sanitize_lean_for_arxiv(text: str) -> str:
     out = text
     for src, dst in LEAN_UNICODE_REPLACEMENTS:
         out = out.replace(src, dst)
+    out = unicodedata.normalize("NFD", out)
+    out = "".join(c for c in out if unicodedata.category(c) != "Mn")
     # Drop any remaining non-ASCII (comments / docstrings) rather than break pdfLaTeX.
     return "".join(ch if ord(ch) < 128 else "?" for ch in out)
 

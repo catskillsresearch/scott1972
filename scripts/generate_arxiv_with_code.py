@@ -23,6 +23,20 @@ FILES = [
     "Scott1972/ContinuousLattice/FunctionSpaceTower.lean",
 ]
 
+FILE_ROLES: dict[str, str] = {
+    "Scott1972.lean": "Root import graph",
+    "Scott1972/ContinuousLattice/Injective.lean": "Scott §1",
+    "Scott1972/ContinuousLattice/WayBelow.lean": "Scott §2",
+    "Scott1972/ContinuousLattice/Specialization.lean": "Scott §2",
+    "Scott1972/ContinuousLattice/ScottMaps.lean": "Scott §2",
+    "Scott1972/ContinuousLattice/MilnerCorrection.lean": "March 1972 correction",
+    "Scott1972/ContinuousLattice/Constructions.lean": "Scott §2.8–2.12",
+    "Scott1972/ContinuousLattice/FunctionSpaces.lean": "Scott §3",
+    "Scott1972/ContinuousLattice/Theorem212.lean": "Theorem 2.12",
+    "Scott1972/ContinuousLattice/InverseLimits.lean": "Scott §4",
+    "Scott1972/ContinuousLattice/FunctionSpaceTower.lean": "Theorem 4.4",
+}
+
 
 def paper_title(arxiv_text: str) -> str:
     first = arxiv_text.splitlines()[0] if arxiv_text else "# Scott 1972"
@@ -89,6 +103,15 @@ def main() -> None:
     parts.append(body)
     parts.append("\n\n---\n\n")
     parts.append("# Appendix A: Complete Lean source\n\n")
+    parts.append("| Role | File |\n")
+    parts.append("| --- | --- |\n")
+    for f in FILES:
+        parts.append(f"| {FILE_ROLES[f]} | `{f}` |\n")
+    parts.append(
+        "\nPrimary source (OCR plain text): [`sources/ScottContinLatt1972.md`]"
+        "(sources/ScottContinLatt1972.md) — transcription of **[Sco72]** for use in the "
+        "Lean development (see §2).\n\n"
+    )
     parts.append(
         "Files appear in `Scott1972.lean` import order. "
         "Each block is a verbatim copy of the repository file at generation time.\n\n"
@@ -96,6 +119,8 @@ def main() -> None:
 
     for f in FILES:
         content = (ROOT / f).read_text().rstrip() + "\n"
+        # Nested ``` in docstrings would break markdown lean fences in arxiv_with_code.md.
+        content = content.replace("```", "'''")
         n = len(content.splitlines())
         parts.append(f"## `{f}`\n\n")
         parts.append(f"*{n} lines.*\n\n")

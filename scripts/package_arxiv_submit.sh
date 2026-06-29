@@ -11,8 +11,10 @@ FIGURES_DIR="figures"
 OUT_DIR="dist"
 ZIP="${OUT_DIR}/arxiv_submit.zip"
 
-echo "==> Regenerating arxiv_with_code.md, arxiv.tex, listings, and figures"
-bash scripts/build_arxiv_tex.sh
+if [[ "${1:-}" != "--skip-tex-build" ]]; then
+  echo "==> Regenerating arxiv_with_code.md, arxiv.tex, listings, and figures"
+  bash scripts/build_arxiv_tex.sh
+fi
 
 missing=0
 if [[ ! -f "$TEX" ]]; then
