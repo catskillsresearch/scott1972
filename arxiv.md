@@ -1086,7 +1086,8 @@ composition identities (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`
 ## 6. Reproducibility
 
 **Inventory source of truth:** this file (`arxiv.md`). Do not use generated `arxiv_with_code.md`
-(it inlines the Lean sources for review/PDF packaging and is stale whenever older than `arxiv.md`).
+or `arxiv.tex` (they inline Lean sources and mermaid figures for review/PDF packaging and are
+stale whenever older than `arxiv.md`).
 
 The repository pins Lean / mathlib **v4.30.0** (`lean-toolchain`).
 
@@ -1094,6 +1095,7 @@ The repository pins Lean / mathlib **v4.30.0** (`lean-toolchain`).
 lake exe cache get
 lake build Scott1972
 bash scripts/generate_arxiv_with_code.sh   # optional: arxiv_with_code.md (gitignored)
+bash scripts/build_arxiv_tex.sh            # optional: arxiv.tex + lean-listings/ (gitignored)
 ```
 
 ---

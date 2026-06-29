@@ -12,8 +12,10 @@ sources/ocr_*.log
 
 # Generated from arxiv.md by scripts/generate_arxiv_with_code.sh (do not commit)
 arxiv_with_code.md
-arxiv_with_code.tex
-arxiv_with_code.pdf
+arxiv.tex
+arxiv.pdf
+lean-listings/
+figures/
 
 # LaTeX build artifacts (the .tex/.pdf deliverables are kept)
 *.aux

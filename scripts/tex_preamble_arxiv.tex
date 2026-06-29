@@ -1,0 +1,206 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{authblk}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{longtable}
+\usepackage{calc}
+\usepackage{newunicodechar}
+\usepackage{listings}
+\usepackage[colorlinks=true,linkcolor=blue!40!black,citecolor=blue!40!black,urlcolor=blue!40!black]{hyperref}
+
+% Let long \texttt{...} identifiers (e.g. lindenbaum_next_subset) break after each
+% underscore so they wrap inside narrow table cells instead of overflowing the column.
+\let\origtextunderscore\_
+\renewcommand{\_}{\origtextunderscore\allowbreak}
+
+% Long inlined Lean listings can exhaust pdfTeX main memory; build locally with
+% LuaLaTeX (see .latexmkrc).  arXiv's AutoTeX has the headroom for pdfLaTeX.
+%
+% The listings are kept as real UTF-8 Lean source: every Lean operator is rendered
+% through a `literate` replacement to a proper LaTeX symbol, so the code displays with
+% its native notation (∀ ◇ □ ⟶ ⊢ φ ψ Γ …) under BOTH pdfLaTeX and LuaLaTeX.  Every
+% non-ASCII glyph that occurs in the sources must appear in this table.
+
+\lstdefinestyle{leanbox}{
+  basicstyle=\footnotesize\ttfamily,
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  upquote=true,
+  extendedchars=true,
+  inputencoding=utf8,
+  literate=
+    {§}{{\S}}1
+    {¬}{{\ensuremath{\neg}}}1
+    {·}{{\ensuremath{\cdot}}}1
+    {×}{{\ensuremath{\times}}}1
+    {Γ}{{\ensuremath{\Gamma}}}1
+    {Δ}{{\ensuremath{\Delta}}}1
+    {Η}{{\ensuremath{H}}}1
+    {Θ}{{\ensuremath{\Theta}}}1
+    {Κ}{{\ensuremath{K}}}1
+    {Σ}{{\ensuremath{\Sigma}}}1
+    {α}{{\ensuremath{\alpha}}}1
+    {β}{{\ensuremath{\beta}}}1
+    {λ}{{\ensuremath{\lambda}}}1
+    {σ}{{\ensuremath{\sigma}}}1
+    {τ}{{\ensuremath{\tau}}}1
+    {φ}{{\ensuremath{\varphi}}}1
+    {χ}{{\ensuremath{\chi}}}1
+    {ψ}{{\ensuremath{\psi}}}1
+    {ᵢ}{{\textsubscript{i}}}1
+    {—}{{\textemdash}}1
+    {⁺}{{\textsuperscript{+}}}1
+    {⁻}{{\textsuperscript{\ensuremath{-}}}}1
+    {₀}{{\textsubscript{0}}}1
+    {₁}{{\textsubscript{1}}}1
+    {₂}{{\textsubscript{2}}}1
+    {₃}{{\textsubscript{3}}}1
+    {₊}{{\textsubscript{+}}}1
+    {ₙ}{{\textsubscript{n}}}1
+    {ₚ}{{\textsubscript{p}}}1
+    {ℕ}{{\ensuremath{\mathbb{N}}}}1
+    {←}{{\ensuremath{\leftarrow}}}1
+    {↑}{{\ensuremath{\uparrow}}}1
+    {→}{{\ensuremath{\rightarrow}}}1
+    {↓}{{\ensuremath{\downarrow}}}1
+    {↔}{{\ensuremath{\leftrightarrow}}}1
+    {↥}{{\ensuremath{\Uparrow}}}1
+    {↦}{{\ensuremath{\mapsto}}}1
+    {↪}{{\ensuremath{\hookrightarrow}}}1
+    {↟}{{\ensuremath{\Uparrow}}}1
+    {⇄}{{\ensuremath{\rightleftarrows}}}1
+    {⇑}{{\ensuremath{\Uparrow}}}1
+    {⇒}{{\ensuremath{\Rightarrow}}}1
+    {⨆}{{\ensuremath{\bigcup}}}1
+    {𝕆}{{\ensuremath{\mathbb{O}}}}1
+    {∀}{{\ensuremath{\forall}}}1
+    {∃}{{\ensuremath{\exists}}}1
+    {∅}{{\ensuremath{\emptyset}}}1
+    {∈}{{\ensuremath{\in}}}1
+    {∉}{{\ensuremath{\notin}}}1
+    {∘}{{\ensuremath{\circ}}}1
+    {∧}{{\ensuremath{\wedge}}}1
+    {∨}{{\ensuremath{\vee}}}1
+    {∪}{{\ensuremath{\cup}}}1
+    {∼}{{\ensuremath{\sim}}}1
+    {≠}{{\ensuremath{\neq}}}1
+    {≤}{{\ensuremath{\leq}}}1
+    {≥}{{\ensuremath{\geq}}}1
+    {≪}{{\ensuremath{\ll}}}1
+    {⊆}{{\ensuremath{\subseteq}}}1
+    {⊑}{{\ensuremath{\sqsubseteq}}}1
+    {⊔}{{\ensuremath{\sqcup}}}1
+    {⊓}{{\ensuremath{\sqcap}}}1
+    {⊢}{{\ensuremath{\vdash}}}1
+    {⊣}{{\ensuremath{\dashv}}}1
+    {⊤}{{\ensuremath{\top}}}1
+    {⊥}{{\ensuremath{\bot}}}1
+    {⊨}{{\ensuremath{\vDash}}}1
+    {⊬}{{\ensuremath{\nvdash}}}1
+    {⊭}{{\ensuremath{\nvDash}}}1
+    {⋀}{{\ensuremath{\bigwedge}}}1
+    {⋁}{{\ensuremath{\bigvee}}}1
+    {─}{{\ensuremath{-}}}1
+    {│}{{\ensuremath{|}}}1
+    {└}{{+}}1
+    {├}{{+}}1
+    {□}{{\ensuremath{\square}}}1
+    {▸}{{\ensuremath{\blacktriangleright}}}1
+    {◇}{{\ensuremath{\lozenge}}}1
+    {⟨}{{\ensuremath{\langle}}}1
+    {⟩}{{\ensuremath{\rangle}}}1
+    {⟶}{{\ensuremath{\longrightarrow}}}2
+    {⟷}{{\ensuremath{\longleftrightarrow}}}2
+    {⟹}{{\ensuremath{\Longrightarrow}}}2
+}
+\lstset{style=leanbox}
+
+% --- Unicode used in the prose (pdfLaTeX needs every non-ASCII glyph declared) ---
+% Greek
+\newunicodechar{α}{\ensuremath{\alpha}}
+\newunicodechar{β}{\ensuremath{\beta}}
+\newunicodechar{σ}{\ensuremath{\sigma}}
+\newunicodechar{φ}{\ensuremath{\varphi}}
+\newunicodechar{χ}{\ensuremath{\chi}}
+\newunicodechar{ψ}{\ensuremath{\psi}}
+\newunicodechar{Γ}{\ensuremath{\Gamma}}
+\newunicodechar{Δ}{\ensuremath{\Delta}}
+% Blackboard
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
+% Logical / modal operators
+\newunicodechar{∀}{\ensuremath{\forall}}
+\newunicodechar{∃}{\ensuremath{\exists}}
+\newunicodechar{¬}{\ensuremath{\neg}}
+\newunicodechar{∧}{\ensuremath{\wedge}}
+\newunicodechar{□}{\ensuremath{\square}}
+\newunicodechar{◇}{\ensuremath{\lozenge}}
+\newunicodechar{∼}{\ensuremath{\sim}}
+% Arrows
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{↔}{\ensuremath{\leftrightarrow}}
+\newunicodechar{↦}{\ensuremath{\mapsto}}
+\newunicodechar{⇒}{\ensuremath{\Rightarrow}}
+\newunicodechar{⟶}{\ensuremath{\longrightarrow}}
+\newunicodechar{⟷}{\ensuremath{\longleftrightarrow}}
+\newunicodechar{⟹}{\ensuremath{\Longrightarrow}}
+\newunicodechar{⟺}{\ensuremath{\Longleftrightarrow}}
+% Relations / turnstiles
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{⊢}{\ensuremath{\vdash}}
+\newunicodechar{⊨}{\ensuremath{\vDash}}
+\newunicodechar{≠}{\ensuremath{\neq}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{≅}{\ensuremath{\cong}}
+\newunicodechar{≪}{\ensuremath{\ll}}
+\newunicodechar{⊆}{\ensuremath{\subseteq}}
+\newunicodechar{⊇}{\ensuremath{\supseteq}}
+\newunicodechar{⊋}{\ensuremath{\supsetneq}}
+\newunicodechar{⊑}{\ensuremath{\sqsubseteq}}
+\newunicodechar{⊔}{\ensuremath{\sqcup}}
+\newunicodechar{⊓}{\ensuremath{\sqcap}}
+\newunicodechar{⊤}{\ensuremath{\top}}
+\newunicodechar{⊥}{\ensuremath{\bot}}
+\newunicodechar{⊣}{\ensuremath{\dashv}}
+\newunicodechar{↪}{\ensuremath{\hookrightarrow}}
+\newunicodechar{↟}{\ensuremath{\Uparrow}}
+\newunicodechar{⇄}{\ensuremath{\rightleftarrows}}
+\newunicodechar{⇑}{\ensuremath{\Uparrow}}
+\newunicodechar{⨆}{\ensuremath{\bigcup}}
+\newunicodechar{𝕆}{\ensuremath{\mathbb{O}}}
+% Sets / connectives
+\newunicodechar{∪}{\ensuremath{\cup}}
+\newunicodechar{⊕}{\ensuremath{\oplus}}
+\newunicodechar{×}{\ensuremath{\times}}
+% Angle brackets
+\newunicodechar{⟨}{\ensuremath{\langle}}
+\newunicodechar{⟩}{\ensuremath{\rangle}}
+% Sub/superscripts (avoid bare math subscript without a base)
+\newunicodechar{₀}{\textsubscript{0}}
+\newunicodechar{₁}{\textsubscript{1}}
+\newunicodechar{ₙ}{\textsubscript{n}}
+\newunicodechar{⁺}{\textsuperscript{+}}
+% Punctuation / misc
+\newunicodechar{·}{\textperiodcentered{}}
+\newunicodechar{—}{\textemdash{}}
+\newunicodechar{–}{\textendash{}}
+\newunicodechar{…}{\ldots}
+\newunicodechar{§}{\S}
+\newunicodechar{│}{\ensuremath{\mid}}
+\newunicodechar{✓}{\ensuremath{\checkmark}}
+\newunicodechar{æ}{\ae}
+\newunicodechar{ö}{\"o}

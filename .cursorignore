@@ -9,3 +9,7 @@ arxiv_with_code.log
 arxiv_with_code.fls
 arxiv_with_code.fdb_latexmk
 arxiv_with_code.synctex.gz
+arxiv.tex
+arxiv.pdf
+lean-listings/
+figures/
