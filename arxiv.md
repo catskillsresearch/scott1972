@@ -28,9 +28,8 @@ Quot.sound]`.
 ---
 
 ## 1. Introduction
-
-It is entirely fair to describe Scott's 1972 paper *Continuous Lattices* as his first fully detailed,
-peer-reviewed publication of the famous $D_\infty$ model for the semantics of Church's untyped
+Scott's 1972 paper *Continuous Lattices* is his first fully detailed,
+peer-reviewed publication of the $D_\infty$ model for the semantics of Church's untyped
 $\lambda$-calculus—but with one crucial historical nuance: **the model was a complete accident**.
 While the 1972 paper is the landmark account, Scott had been trying to prove that such a model was
 mathematically *impossible*.
@@ -39,9 +38,9 @@ Three factors frame the breakthrough:
 
 ### The goal was types, not the untyped calculus
 
-In the late 1960s Dana Scott worked alongside Christopher Strachey at Oxford. Scott was a firm skeptic
+In the late 1960s Dana Scott worked alongside Christopher Strachey at Oxford. Scott was a skeptic
 of Alonzo Church's untyped $\lambda$-calculus. He believed programming languages should be strictly
-typed and famously argued that the untyped calculus lacked a legitimate mathematical foundation. He
+typed and argued that the untyped calculus lacked a legitimate mathematical foundation. He
 began developing domain theory specifically to provide a denotational semantics for *typed* languages.
 
 ### The discovery of $D_\infty$ (1969)
@@ -65,15 +64,11 @@ tightly knit manuscripts:
   literal first write-up distributed among colleagues right after the November discovery.
 - **1970 (conference paper):** **[Sco70]** *Outline of a mathematical theory of computation*—a brief, high-level
   introductory account.
-- **1972 (published paper):** **[Sco72]** *Continuous Lattices*—prepared as a technical report in 1971; universally
-  recognized as the landmark paper that formally gifted the mathematical and computer science
+- **1972 (published paper):** **[Sco72]** *Continuous Lattices*—prepared as a technical report in 1971;
+  recognized as the landmark paper that gave the mathematical and computer science
   communities the $D_\infty$ model.
 
-When citing this work, it is standard practice to treat the 1972 paper as Scott's definitive
-foundational model for Church's untyped calculus—remembering that he stumbled into it while trying to
-prove the exact opposite.
-
-Scott's paper itself opens by arguing that $T_0$-spaces, long treated as a mere exercise in separation
+Scott's paper opens by arguing that $T_0$-spaces, long treated as a mere exercise in separation
 axioms, are natural once one cares about function spaces and extension properties rather than
 geometry. That shift—from typed skepticism to the accidental $D_\infty$ model—is the backdrop for
 the formalization in §3–§5.
@@ -104,10 +99,11 @@ Scott organizes the paper in four technical sections (following an introductory 
 | §3 | **Function spaces** | $[D \to D']$ as a continuous lattice (Thm. 3.3); $\lambda$-abstraction, evaluation, projections, fixed points |
 | §4 | **Inverse limits** | $D_\infty$ as inverse/direct limit; capstone $D_\infty \cong [D_\infty \to D_\infty]$ (Thm. 4.4) |
 
-Our primary source text is the OCR transcription
-[`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md) (from the LNM 274 PDF), checked
-against [`sources/ScottContinLatt1972_vision.md`](sources/ScottContinLatt1972_vision.md) through the
-Milner correction.
+Our working source text is [`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md): a plain-text OCR
+transcription of the LNM 274 PDF through the Milner correction (pp. 135–136). Image-based PDFs are
+poor inputs for mechanized proof development; this file gives the formalization a reliable, searchable
+text to quote against. (An earlier filename suffix `_vision` reflected the OCR toolchain only and
+has been dropped to avoid confusion with the published paper.)
 
 ---
 
@@ -200,21 +196,23 @@ both Scott and Lean.
 ### 4.1 Proof dependency structure
 
 Scott §1–§4 are not independent modules; the Lean import graph follows Scott's exposition order.
+Note that Propositions 2.10(a)–(b) live in `FunctionSpaces.lean` (§3 module) even though Scott
+numbers them in §2; `Theorem212.lean` bridges §2 and §3 for Theorem 2.12 and Lemma 3.9.
 
 ```mermaid
 flowchart LR
   S1["§1 Injective spaces<br/><i>Injective.lean</i>"]
-  S2["§2 Continuous lattices<br/><i>WayBelow · Specialization · ScottMaps · Constructions</i>"]
+  S2["§2 Continuous lattices<br/><i>WayBelow · Specialization · ScottMaps · Constructions · MilnerCorrection</i>"]
   S3["§3 Function spaces<br/><i>FunctionSpaces.lean</i>"]
   S4["§4 Inverse limits<br/><i>InverseLimits · FunctionSpaceTower</i>"]
-  MIL["Milner correction<br/><i>MilnerCorrection.lean</i>"]
+  T212["Theorem 2.12 / Lemma 3.9<br/><i>Theorem212.lean</i>"]
 
-  S1 -->|"2.11, 2.12"| S2
-  S2 --> S3
-  S3 -->|"3.8, 3.9"| S4
-  MIL -.->|"3.3"| S2
-  MIL -.-> S3
-  S3 -.->|"retr_ambientSSup_eq_sSup"| S2
+  S1 -->|"Cor 1.6; Constructions import"| S2
+  S2 -->|"ScottMaps"| S3
+  S2 --> S4
+  S3 --> S4
+  S2 -.-> T212
+  S3 -.-> T212
 ```
 
 ### 4.2 §1 Injective spaces — result hierarchy
@@ -234,6 +232,7 @@ flowchart TD
   P12 --> P13
   P12 --> P14
   P12 --> P15
+  P13 --> P15
   P12 --> C16
   P14 --> C16
   P15 --> C16
@@ -262,7 +261,6 @@ flowchart TD
   P29b["proposition_2_9_b (Scott = product top.)"]
   P210a["proposition_2_10_a (retract is CL)"]
   P210b["proposition_2_10_b (Scott = subspace top.)"]
-  P210L["retr_ambientSSup_eq_sSup"]
   P211["proposition_2_11"]
   SCP["scottTopology_prop (Scott 𝕆 = Sierpiński)"]
   SPCL["sierpinskiPower_isContinuousLattice"]
@@ -271,9 +269,11 @@ flowchart TD
   C16["corollary_1_6 (injective = retract of 𝕆ᴵ)"]
   T212b["theorem_2_12_backward (injective ⟹ CL)"]
   T212["theorem_2_12 (equivalence)"]
-  MIL["CoarserThanScottTopology"]
 
   P22 --> P24
+  P22 --> P29b
+  P22 --> P211
+  P22 --> P210a
   D23 --> P24
   P22 --> P25
   P25 --> P26
@@ -283,7 +283,6 @@ flowchart TD
   D23 --> P29a
   P29a --> P29b
   D23 --> P210a
-  P210L --> P210a
   P210a --> P210b
   P28 --> SPCL
   P29a --> SPCL
@@ -304,17 +303,18 @@ flowchart TD
 
 ### 4.4 §3 Function spaces — result hierarchy
 
+Proposition 2.7 is proved in `ScottMaps.lean` but not tracked separately in §4; it feeds Proposition
+2.6's infrastructure. Propositions 2.10(a)–(b) are proved in `FunctionSpaces.lean`. Proposition 3.2
+is formalized but is not on the critical path to later results.
+
 ```mermaid
 flowchart TD
   P25["proposition_2_5"]
   P26["proposition_2_6"]
-  P27["proposition_2_7_*"]
-  P32["proposition_3_2"]
   T33c["theorem_3_3_sSup · theorem_3_3_sup"]
   T33a["theorem_3_3_isContinuousLattice (3.3a) · stepMap*"]
   T33b["theorem_3_3_topology (3.3b) · wayBelow_le_finset_sup_step"]
   T33["theorem_3_3 full (3.3a+3.3b)"]
-  C34x["corollary_3_4 (fixed x)"]
   C34j["corollary_3_4_jointly_continuous"]
   P35r["scottLambdaAt · curry_left/right"]
   P35["proposition_3_5 (lambda continuous)"]
@@ -324,27 +324,19 @@ flowchart TD
   P310f["incl_bot · incl_sup · incl_sSup · incl_injective · incl_wayBelow"]
   P310c["proposition_3_10_converse · retr_eq_sSup (uniqueness)"]
   P38p["scottExtend · scottExtend_continuous · scottExtend_eq_of_continuous"]
-  P38["proposition_3_8 (continuous + extends + maximal)"]
-  L39i["lemma_3_9_incl_inf (aux)"]
-  L39r["lemma_3_9_retr_inf (aux)"]
-  L39["lemma_3_9 (f̄ = j ∘ ḡ)"]
+  P38["proposition_3_8 (Constructions.lean)"]
+  L39["lemma_3_9 (Theorem212.lean)"]
   P312["proposition_3_12"]
   P313["proposition_3_13"]
   P314["proposition_3_14"]
 
   P25 --> T33c
   T33c --> T33a
-  P32 --> T33a
   T33a --> T33b
   T33a --> T33
   T33b --> T33
-  P26 --> T33
-  P27 --> T33
-  T33 --> C34x
   P26 --> C34j
-  T33 --> C34j
   T33 --> P35
-  P26 --> P35
   P35r --> P35
   D36 --> P37r
   D36 --> P37p
@@ -355,9 +347,7 @@ flowchart TD
   P38 --> L39
   D36 --> L39
   T33 --> P313
-  P313 --> P314
-  P312 --> P313
-  P32 --> T33
+  T33 --> P314
 ```
 
 
@@ -367,10 +357,12 @@ flowchart TD
 Scott §4 is complete in Lean: Propositions 4.1–4.2, Corollary 4.3, Lemma 4.5, and Theorem 4.4
 **(a)–(d)**. See §5.3 for proof notes on the capstone.
 
+The Lean proof of Proposition 4.1 uses the order-theoretic adjoint route (Props 2.9a and 2.10a),
+not Scott's injectivity route through Propositions 3.8 and Lemma 3.9. Lemma 4.5 enters Theorem
+4.4(c); Lemma 3.9 is not used in the capstone proof.
+
 ```mermaid
 flowchart TD
-  P38["proposition_3_8 full"]
-  L39["lemma_3_9 global"]
   P37["proposition_3_7_*"]
   P29a["proposition_2_9_a (∏ CL)"]
   P210a["proposition_2_10_a (retract)"]
@@ -396,7 +388,6 @@ flowchart TD
   L45 --> T44c
   T44b --> T44d
   T44c --> T44d
-  L39 --> T44d
 ```
 
 
@@ -1094,11 +1085,15 @@ composition identities (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`
 
 ## 6. Reproducibility
 
+**Inventory source of truth:** this file (`arxiv.md`). Do not use generated `arxiv_with_code.md`
+(it inlines the Lean sources for review/PDF packaging and is stale whenever older than `arxiv.md`).
+
 The repository pins Lean / mathlib **v4.30.0** (`lean-toolchain`).
 
 ```bash
 lake exe cache get
 lake build Scott1972
+bash scripts/generate_arxiv_with_code.sh   # optional: arxiv_with_code.md (gitignored)
 ```
 
 ---
@@ -1119,8 +1114,8 @@ lake build Scott1972
 | `Scott1972/ContinuousLattice/InverseLimits.lean` | Scott §4 |
 | `Scott1972/ContinuousLattice/FunctionSpaceTower.lean` | Theorem 4.4 |
 
-Primary source: [`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md). Vision merge:
-`sources/ScottContinLatt1972_vision.md`.
+Primary source (OCR plain text): [`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md) —
+transcription of **[Sco72]** for use in the Lean development (see §2).
 
 ---
 
