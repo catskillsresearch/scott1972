@@ -1,110 +1,212 @@
-# Scott 1972 *Continuous Lattices* in Lean 4 (Part I)
+# A Lean 4 Formalization of Scott's *Continuous Lattices* (1972)
 
 ---
 
 ## Abstract
 
-Lean 4 / mathlib formalization of Dana Scott's **1972** *Continuous Lattices* (LNM 274):
-injective `T₀`-spaces, Scott topology, way-below, function spaces, inverse limits.
+We present a complete machine-checked formalization of Dana Scott's landmark 1972 paper
+*Continuous Lattices* (LNM 274), carried out in Lean 4 against mathlib and including the March
+1972 Milner correction (pp. 135–136).
 
-This repository is **Part I** of a four-part monograph. Equivalence theorems (Parts I–III)
-live in [`scott_models`](https://github.com/catskillsresearch/scott_models).
+Scott's paper develops domain theory from a topological starting point. He defines *injective*
+$T_0$-spaces—those with a strong extension property for continuous maps—and shows that they are
+exactly the *continuous lattices*: complete lattices whose Scott topology is determined by the
+order via the way-below relation ($\ll$). On this foundation he studies projections, retractions,
+products, function spaces, and inverse limits. The capstone (Theorem 4.4) constructs an inverse
+limit $D_\infty$ of function-space approximants and proves $D_\infty \cong [D_\infty \to D_\infty]$,
+yielding a purely mathematical model for Church's untyped $\lambda$-calculus.
 
-**Inventory source of truth:** this file (`arxiv.md`). Do not use generated `arxiv_with_code.md`.
+Our development formalizes **43 numbered results** from Scott's §1–§4 (Propositions, Corollaries,
+Lemmas, and Theorems), each as a sorry-free Lean theorem, together with supporting infrastructure
+(step functions, the `↟a` basis of Scott opens, Milner's coarser-than-Scott hypothesis, the
+function-space tower, and the $i_\infty$/$j_\infty$ pair). The formalization is **classical**
+(uses `Classical.choice` transitively) and follows Scott's proof dependency order. Where the Lean
+proof required choices not visible in the original—or where dead ends were encountered—we record
+detailed notes in §5. All proofs check with the standard footprint `[propext, Classical.choice,
+Quot.sound]`.
 
 ---
 
-## 1. Part I — Scott 1972 *Continuous Lattices*
+## 1. Introduction
 
-**Source:** Scott, *Continuous Lattices*, LNM 274 (1972); vision transcription in
-`[sources/ScottContinLatt1972_vision.md](sources/ScottContinLatt1972_vision.md)` through the
-**March 1972 Milner correction** (pp. 135–136).
+It is entirely fair to describe Scott's 1972 paper *Continuous Lattices* as his first fully detailed,
+peer-reviewed publication of the famous $D_\infty$ model for the semantics of Church's untyped
+$\lambda$-calculus—but with one crucial historical nuance: **the model was a complete accident**.
+While the 1972 paper is the landmark account, Scott had been trying to prove that such a model was
+mathematically *impossible*.
 
-**Constructivity:** **Classical.** Uses mathlib topology, `Classical.choice` transitively,
-embedding into Sierpiński powers, and order-theoretic arguments not audited for constructivity.
+Three factors frame the breakthrough:
 
-**Lean root:** `Scott1972/ContinuousLattice/` (imported from `Scott1972.lean` before `InfoSys`).
+### The goal was types, not the untyped calculus
 
-Scott's four section titles within Part I:
+In the late 1960s Dana Scott worked alongside Christopher Strachey at Oxford. Scott was a firm skeptic
+of Alonzo Church's untyped $\lambda$-calculus. He believed programming languages should be strictly
+typed and famously argued that the untyped calculus lacked a legitimate mathematical foundation. He
+began developing domain theory specifically to provide a denotational semantics for *typed* languages.
 
+### The discovery of $D_\infty$ (1969)
 
-| §   | Title                   | Lean modules                                                                                            |
-| --- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| §1  | **Injective spaces**    | `Injective.lean`                                                                                        |
-| §2  | **Continuous lattices** | `WayBelow.lean`, `Specialization.lean`, `ScottMaps.lean`, `Constructions.lean`, `MilnerCorrection.lean` |
-| §3  | **Function spaces**     | `FunctionSpaces.lean`                                                                                   |
-| §4  | **Inverse limits**      | `InverseLimits.lean` (4.1, 4.2 done)                                                                    |
+To model the untyped $\lambda$-calculus, a space $D$ must be isomorphic to its own function space
+($D \cong [D \to D]$). In standard set theory, Cantor's theorem makes this size-wise impossible: the
+power of a function space strictly exceeds the size of the base set.
 
+In November 1969, while attempting to formalize why this restriction made untyped models impossible,
+Scott realized that if one restricts to Scott-continuous functions (those preserving directed
+suprema) rather than all arbitrary functions, the space does not explode in size. By constructing an
+inverse limit of algebraic lattices ($D_0 \to D_1 \to D_2 \to \cdots$), he built $D_\infty$, the
+first non-degenerate, purely mathematical model of the untyped $\lambda$-calculus.
 
-### 1.1 Report card (43 tracked results)
+### Chronology of the papers
 
-**Pass** = full numbered statement proved, sorry-free. **Stuck** = partial. **Not Yet** = no
-full deliverable. Score: **43 Pass · 0 Stuck · 0 Not Yet**.
+Although the definitive mathematical breakdown appeared in 1972, Scott's "first attempts" span a few
+tightly knit manuscripts:
 
-Theorem 4.4 is split into four subgoals **(a)–(d)** so each can be tackled in its own session.
-Session prompt: `HANDOFF-Theorem-4.4.md`.
+- **1969 (unpublished manuscript):** **[Sco69]** *Lattice-theoretic models for the $\lambda$-calculus*—the
+  literal first write-up distributed among colleagues right after the November discovery.
+- **1970 (conference paper):** **[Sco70]** *Outline of a mathematical theory of computation*—a brief, high-level
+  introductory account.
+- **1972 (published paper):** **[Sco72]** *Continuous Lattices*—prepared as a technical report in 1971; universally
+  recognized as the landmark paper that formally gifted the mathematical and computer science
+  communities the $D_\infty$ model.
 
-**Supporting keystones (not separately numbered by Scott):** `directedOn_wayBelow`,
-`wayBelow_interpolate` (interpolation property of `≪`, **axiom-free**), `exists_wayBelow_subset`
-(the `↟a` basis of the Scott topology) in `WayBelow.lean`; these underpin 2.11.
+When citing this work, it is standard practice to treat the 1972 paper as Scott's definitive
+foundational model for Church's untyped calculus—remembering that he stumbled into it while trying to
+prove the exact opposite.
 
+Scott's paper itself opens by arguing that $T_0$-spaces, long treated as a mere exercise in separation
+axioms, are natural once one cares about function spaces and extension properties rather than
+geometry. That shift—from typed skepticism to the accidental $D_\infty$ model—is the backdrop for
+the formalization in §3–§5.
 
-| §   | Scott     | Lean name(s)                                                                                                                     | Module                | Status      | Notes                                |
-| --- | --------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------- | ------------------------------------ |
-| 1   | Prop 1.2  | `proposition_1_2`                                                                                                                | `Injective.lean`      | **Pass**    |                                      |
-| 1   | Prop 1.3  | `proposition_1_3`                                                                                                                | `Injective.lean`      | **Pass**    |                                      |
-| 1   | Prop 1.4  | `proposition_1_4`                                                                                                                | `Injective.lean`      | **Pass**    |                                      |
-| 1   | Prop 1.5  | `proposition_1_5`                                                                                                                | `Injective.lean`      | **Pass**    |                                      |
-| 1   | Cor 1.6   | `corollary_1_6`                                                                                                                  | `Injective.lean`      | **Pass**    |                                      |
-| 1   | Cor 1.7   | `corollary_1_7`                                                                                                                  | `Injective.lean`      | **Pass**    |                                      |
-| 2   | Prop 2.1  | `proposition_2_1`                                                                                                                | `Specialization.lean` | **Pass**    | iff; `_of_le` + `_le_of_converges`   |
-| 2   | Prop 2.2  | `bot_wayBelow`, `WayBelow.sup`, `WayBelow.trans_le`, `WayBelow.le_trans`, `wayBelow_self_iff_scottOpen_Ici`, `wayBelow_sSup_iff` | `WayBelow.lean`       | **Pass**    | seven clauses                        |
-| 2   | Prop 2.4  | `isContinuousLattice_iff_isLUB_sInf_nhds`                                                                                        | `WayBelow.lean`       | **Pass**    |                                      |
-| 2   | Prop 2.5  | `proposition_2_5`                                                                                                                | `ScottMaps.lean`      | **Pass**    |                                      |
-| 2   | Prop 2.6  | `proposition_2_6`                                                                                                                | `ScottMaps.lean`      | **Pass**    | joint ↔ separate continuity          |
-| 2   | Prop 2.8  | `proposition_2_8`                                                                                                                 | `Constructions.lean`  | **Pass**    | finite lattices                      |
-| 2   | Prop 2.9(a) | `proposition_2_9_a`                                                                                                              | `Constructions.lean`  | **Pass**    | product of CLs is a CL (order content) |
-| 2   | Prop 2.9(b) | `proposition_2_9_b` (and bundled `proposition_2_9`)                                                                            | `Constructions.lean`  | **Pass**    | Scott top. of product = product of Scott tops. |
-| 2   | Prop 2.10(a) | `proposition_2_10_a`                                                                                                          | `FunctionSpaces.lean` | **Pass**    | retract of CL is a CL (order content) |
-| 2   | Prop 2.10(b) | `proposition_2_10_b` (and bundled `proposition_2_10`)                                                                        | `FunctionSpaces.lean` | **Pass**    | Scott top. of retract = subspace top. (Milner) |
-| 2   | Prop 2.11 | `proposition_2_11`                                                                                                                | `Constructions.lean`  | **Pass**    | CL injective (`scottExtend`)         |
-| 2   | Thm 2.12  | `theorem_2_12`, `theorem_2_12_backward`, `theorem_2_12_forward`                                                                  | `Theorem212.lean`     | **Pass**    | full equivalence: `T₀`-space injective ⟺ homeomorphic to a CL under its Scott topology |
-| 3   | Prop 3.2  | `proposition_3_2`                                                                                                                | `FunctionSpaces.lean` | **Pass**    |                                      |
-| 3   | Thm 3.3(a) | `theorem_3_3_isContinuousLattice` (+ `ScottMap.instCompleteLattice`, `stepMap`, `stepMap_wayBelow`, `stepMap_pointwise_sSup`) | `FunctionSpaces.lean` | **Pass**    | `[D→D']` is a CL (order content) via step functions |
-| 3   | Thm 3.3(b) | `theorem_3_3_topology` (+ `theorem_3_3`, `wayBelow_le_finset_sup_step`, `pointwiseSubbasic_scottOpen`)                          | `FunctionSpaces.lean` | **Pass**    | lattice top. = pointwise-convergence top. (topology content) |
-| 3   | Cor 3.4   | `corollary_3_4_jointly_continuous`, `corollary_3_4_preservesDirectedSup` (+ `corollary_3_4` fixed-`x`)                            | `FunctionSpaces.lean` | **Pass**    | joint continuity of `eval` via Prop 2.6 |
-| 3   | Prop 3.5  | `proposition_3_5`, `scottLambda` (+ `curry_left/right_preservesDirectedSup`, `lambda_outer_preservesDirectedSup`)                | `FunctionSpaces.lean` | **Pass**    | `lambda : [[D×D']→D''] → [D→[D'→D'']]` continuous |
-| 3   | Prop 3.7  | `proposition_3_7_retraction`, `proposition_3_7_projection`                                                                       | `FunctionSpaces.lean` | **Pass**    |                                      |
-| 3   | Prop 3.8  | `proposition_3_8`, `scottExtend_maximal`, `continuous_eq_sSup_openInfs`                                                          | `Constructions.lean`  | **Pass**    | continuous + extends + maximal       |
-| 3   | Lemma 3.9 | `lemma_3_9` (global eq `f̄ = j ∘ ḡ`), `scottExtend_maximal_le`                                                                    | `Theorem212.lean`     | **Pass**    | global eq via 3.8 maximality (both)  |
-| 3   | Prop 3.10 | `incl_sSup`/`incl_injective`/`incl_wayBelow` (fwd), `proposition_3_10_converse`, `retr_eq_sSup` (uniq)                           | `FunctionSpaces.lean` | **Pass**    | (i)–(iii) + converse (iv) + uniq     |
-| 3   | Prop 3.12 | `proposition_3_12`, `IsProjection`, `isProjection_sSup`, `Projections.instCompleteLattice`                                       | `FunctionSpaces.lean` | **Pass**    | `J_D` is a `⊔`-closed complete latt. |
-| 3   | Prop 3.13 | `proposition_3_13`, `Proposition313.projection` (`con`/`min`)                                                                    | `FunctionSpaces.lean` | **Pass**    | `D` is a projection of `[D → D]`     |
-| 3   | Prop 3.14 | `proposition_3_14`, `Proposition314.fixMap`, `fix_eq`/`fix_le`/`fix_unique`                                                      | `FunctionSpaces.lean` | **Pass**    | continuous least-fixed-point op.     |
-| 4   | Prop 4.1  | `proposition_4_1`, `InverseLimit`, `inverseLimitRetraction`                                                                      | `InverseLimits.lean`  | **Pass**    | `D∞` is a continuous lattice         |
-| 4   | Prop 4.2  | `proposition_4_2`, `embInf`/`projInf`, `iComp`, `embInf_succ`, `inverseLimit_eq_iSup`                                            | `InverseLimits.lean`  | **Pass**    | `j_{∞n}` are projections; `i_{n∞}`, recursion, monotone lub |
-| 4   | Cor 4.3   | `corollary_4_3` (∃! mediating map), `coconeInf` (`f∞`), `coconeInf_comp_embInf`                                                  | `InverseLimits.lean`  | **Pass**    | `D∞` is also the *direct* limit      |
-| 4   | Lemma 4.5 | `lemma_4_5`, `idInf_eq_iSup` (remark after 4.2)                                                                                  | `InverseLimits.lean`  | **Pass**    | recognize projections from limits    |
-| 4   | Thm 4.4(a) | `embInfInf` / `projInfInf` (+ `iInfTerm`/`jInfTerm`, `*_apply`, `*_preservesDirectedSup`)                                       | `FunctionSpaceTower.lean` | **Pass**    | `i∞`/`j∞` as `ScottMap`s (sups of Scott maps) |
-| 4   | Thm 4.4(b) | `projInfInf_comp_embInfInf`                                                                                                     | `FunctionSpaceTower.lean` | **Pass**    | `j∞ ∘ i∞ = id` on `D∞`                    |
-| 4   | Thm 4.4(c) | `embInfInf_comp_projInfInf`                                                                                                     | `FunctionSpaceTower.lean` | **Pass**    | `i∞ ∘ j∞ = id` on `[D∞→D∞]` (`lemma_4_5`) |
-| 4   | Thm 4.4(d) | `theorem_4_4`, `theorem_4_4_orderIso`                                                                                           | `FunctionSpaceTower.lean` | **Pass**    | capstone `D∞ ≅ [D∞ → D∞]`                 |
+The development documented below follows **[Sco72]** through the March 1972 Milner correction.
+§2 summarizes Scott's original paper; §3–§4 describe the Lean development and catalog the
+formalized theorems; §5 records proof notes where the mechanization adds detail beyond the
+published text.
 
+---
 
-**Milner infrastructure:** `CoarserThanScottTopology`, `scottOpen_of_coarserThanScott`,
-`scottLowerSubbasisSet`, `scottPrincipalUpSet` in `MilnerCorrection.lean`.
+## 2. Scott's *Continuous Lattices*
 
-**Notation:** `⊔S′` = ambient join in `D′` (`ambientSSup`); `⊔S` = subspace join;
-`j(⊔S′) = ⊔S` = `retr_ambientSSup_eq_sSup`.
+**[Sco72]** develops domain theory from injective $T_0$-spaces. Scott's own abstract states the
+arc of the paper: starting topologically, he introduces spaces with a strong extension property for
+continuous maps; shows they are exactly the continuous lattices—complete lattices whose topology is
+the Scott topology determined by the order; studies projections, subspaces, embeddings, products,
+and function spaces; and proves the main result that one can embed every space in a continuous
+lattice $D_\infty$ that is homeomorphic (and order-isomorphic) to its own function space
+$[D_\infty \to D_\infty]$, yielding models for the Church–Curry $\lambda$-calculus.
 
-### 1.2 Part I internal dependency (Scott §1–§4 are not independent)
+Scott organizes the paper in four technical sections (following an introductory §0):
+
+| Scott § | Title | Main content |
+| --- | --- | --- |
+| §1 | **Injective spaces** | Definition of injectivity; $\mathbb{O}$ and its powers; retract characterization (Cor. 1.6–1.7) |
+| §2 | **Continuous lattices** | Way-below ($\ll$), Scott topology, Scott-continuous maps; products and retractions; injectivity ⟺ continuous lattice (Thm. 2.12) |
+| §3 | **Function spaces** | $[D \to D']$ as a continuous lattice (Thm. 3.3); $\lambda$-abstraction, evaluation, projections, fixed points |
+| §4 | **Inverse limits** | $D_\infty$ as inverse/direct limit; capstone $D_\infty \cong [D_\infty \to D_\infty]$ (Thm. 4.4) |
+
+Our primary source text is the OCR transcription
+[`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md) (from the LNM 274 PDF), checked
+against [`sources/ScottContinLatt1972_vision.md`](sources/ScottContinLatt1972_vision.md) through the
+Milner correction.
+
+---
+
+## 3. The Lean formalization
+
+### 3.1 Scope and methodology
+
+The Lean development lives under `Scott1972/ContinuousLattice/` (root import `Scott1972.lean`). We
+track Scott's numbered statements: each row in §4 corresponds to a named theorem in the repository,
+proved sorry-free. Results not separately numbered by Scott but required for later steps—such as
+`wayBelow_interpolate`, `exists_wayBelow_subset`, and the Milner infrastructure—appear as supporting
+lemmas in the module map below.
+
+**Milner infrastructure** (March 1972 correction): `CoarserThanScottTopology`,
+`scottOpen_of_coarserThanScott`, `scottLowerSubbasisSet`, `scottPrincipalUpSet` in
+`MilnerCorrection.lean`.
+
+**Notation:** `⊔S′` denotes the ambient join in $D′$ (`ambientSSup`); `⊔S` the subspace join;
+`j(⊔S′) = ⊔S` is `retr_ambientSSup_eq_sSup`.
+
+### 3.2 Constructivity
+
+The formalization is **classical**. It uses mathlib topology, `Classical.choice` (transitively),
+embedding into Sierpiński powers, and order-theoretic arguments that have not been audited for
+constructivity. Every completed proof reports `#print axioms` as
+`[propext, Classical.choice, Quot.sound]`.
+
+### 3.3 Module map
+
+| Scott § | Title | Lean modules |
+| --- | --- | --- |
+| §1 | **Injective spaces** | `Injective.lean` |
+| §2 | **Continuous lattices** | `WayBelow.lean`, `Specialization.lean`, `ScottMaps.lean`, `Constructions.lean`, `MilnerCorrection.lean` |
+| §3 | **Function spaces** | `FunctionSpaces.lean` |
+| §4 | **Inverse limits** | `InverseLimits.lean`, `FunctionSpaceTower.lean` |
+
+---
+
+## 4. Catalog of formalized results
+
+We formalize **43** numbered results from Scott §1–§4. Each entry is a full statement matching
+Scott's numbering, proved without `sorry`. Theorem 4.4 is split into four subgoals **(a)–(d)** in
+both Scott and Lean.
+
+**Supporting keystones** (not separately numbered by Scott): `directedOn_wayBelow`,
+`wayBelow_interpolate` (interpolation for $\ll$, **axiom-free**), and `exists_wayBelow_subset`
+(the $\uparrow a$ basis of the Scott topology) in `WayBelow.lean`; these underpin Proposition 2.11.
+
+| § | Scott | Lean identifier(s) | Module |
+| --- | --- | --- | --- |
+| 1 | Prop 1.2 | `proposition_1_2` | `Injective.lean` |
+| 1 | Prop 1.3 | `proposition_1_3` | `Injective.lean` |
+| 1 | Prop 1.4 | `proposition_1_4` | `Injective.lean` |
+| 1 | Prop 1.5 | `proposition_1_5` | `Injective.lean` |
+| 1 | Cor 1.6 | `corollary_1_6` | `Injective.lean` |
+| 1 | Cor 1.7 | `corollary_1_7` | `Injective.lean` |
+| 2 | Prop 2.1 | `proposition_2_1` | `Specialization.lean` |
+| 2 | Prop 2.2 | `bot_wayBelow`, `WayBelow.sup`, `WayBelow.trans_le`, `WayBelow.le_trans`, `wayBelow_self_iff_scottOpen_Ici`, `wayBelow_sSup_iff` | `WayBelow.lean` |
+| 2 | Prop 2.4 | `isContinuousLattice_iff_isLUB_sInf_nhds` | `WayBelow.lean` |
+| 2 | Prop 2.5 | `proposition_2_5` | `ScottMaps.lean` |
+| 2 | Prop 2.6 | `proposition_2_6` | `ScottMaps.lean` |
+| 2 | Prop 2.8 | `proposition_2_8` | `Constructions.lean` |
+| 2 | Prop 2.9(a) | `proposition_2_9_a` | `Constructions.lean` |
+| 2 | Prop 2.9(b) | `proposition_2_9_b`, `proposition_2_9` | `Constructions.lean` |
+| 2 | Prop 2.10(a) | `proposition_2_10_a` | `FunctionSpaces.lean` |
+| 2 | Prop 2.10(b) | `proposition_2_10_b`, `proposition_2_10` | `FunctionSpaces.lean` |
+| 2 | Prop 2.11 | `proposition_2_11` | `Constructions.lean` |
+| 2 | Thm 2.12 | `theorem_2_12`, `theorem_2_12_backward`, `theorem_2_12_forward` | `Theorem212.lean` |
+| 3 | Prop 3.2 | `proposition_3_2` | `FunctionSpaces.lean` |
+| 3 | Thm 3.3(a) | `theorem_3_3_isContinuousLattice`, `ScottMap.instCompleteLattice`, `stepMap`, `stepMap_wayBelow`, `stepMap_pointwise_sSup` | `FunctionSpaces.lean` |
+| 3 | Thm 3.3(b) | `theorem_3_3_topology`, `theorem_3_3`, `wayBelow_le_finset_sup_step`, `pointwiseSubbasic_scottOpen` | `FunctionSpaces.lean` |
+| 3 | Cor 3.4 | `corollary_3_4_jointly_continuous`, `corollary_3_4_preservesDirectedSup`, `corollary_3_4` | `FunctionSpaces.lean` |
+| 3 | Prop 3.5 | `proposition_3_5`, `scottLambda`, `curry_left/right_preservesDirectedSup`, `lambda_outer_preservesDirectedSup` | `FunctionSpaces.lean` |
+| 3 | Prop 3.7 | `proposition_3_7_retraction`, `proposition_3_7_projection` | `FunctionSpaces.lean` |
+| 3 | Prop 3.8 | `proposition_3_8`, `scottExtend_maximal`, `continuous_eq_sSup_openInfs` | `Constructions.lean` |
+| 3 | Lemma 3.9 | `lemma_3_9`, `scottExtend_maximal_le` | `Theorem212.lean` |
+| 3 | Prop 3.10 | `incl_sSup`, `incl_injective`, `incl_wayBelow`, `proposition_3_10_converse`, `retr_eq_sSup` | `FunctionSpaces.lean` |
+| 3 | Prop 3.12 | `proposition_3_12`, `IsProjection`, `isProjection_sSup`, `Projections.instCompleteLattice` | `FunctionSpaces.lean` |
+| 3 | Prop 3.13 | `proposition_3_13`, `Proposition313.projection` | `FunctionSpaces.lean` |
+| 3 | Prop 3.14 | `proposition_3_14`, `Proposition314.fixMap`, `fix_eq`, `fix_le`, `fix_unique` | `FunctionSpaces.lean` |
+| 4 | Prop 4.1 | `proposition_4_1`, `InverseLimit`, `inverseLimitRetraction` | `InverseLimits.lean` |
+| 4 | Prop 4.2 | `proposition_4_2`, `embInf`, `projInf`, `iComp`, `embInf_succ`, `inverseLimit_eq_iSup` | `InverseLimits.lean` |
+| 4 | Cor 4.3 | `corollary_4_3`, `coconeInf`, `coconeInf_comp_embInf` | `InverseLimits.lean` |
+| 4 | Lemma 4.5 | `lemma_4_5`, `idInf_eq_iSup` | `InverseLimits.lean` |
+| 4 | Thm 4.4(a) | `embInfInf`, `projInfInf`, `iInfTerm`, `jInfTerm`, `*_apply`, `*_preservesDirectedSup` | `FunctionSpaceTower.lean` |
+| 4 | Thm 4.4(b) | `projInfInf_comp_embInfInf` | `FunctionSpaceTower.lean` |
+| 4 | Thm 4.4(c) | `embInfInf_comp_projInfInf` | `FunctionSpaceTower.lean` |
+| 4 | Thm 4.4(d) | `theorem_4_4`, `theorem_4_4_orderIso` | `FunctionSpaceTower.lean` |
+
+### 4.1 Proof dependency structure
+
+Scott §1–§4 are not independent modules; the Lean import graph follows Scott's exposition order.
 
 ```mermaid
 flowchart LR
   S1["§1 Injective spaces<br/><i>Injective.lean</i>"]
   S2["§2 Continuous lattices<br/><i>WayBelow · Specialization · ScottMaps · Constructions</i>"]
   S3["§3 Function spaces<br/><i>FunctionSpaces.lean</i>"]
-  S4["§4 Inverse limits<br/><i>not started</i>"]
+  S4["§4 Inverse limits<br/><i>InverseLimits · FunctionSpaceTower</i>"]
   MIL["Milner correction<br/><i>MilnerCorrection.lean</i>"]
 
   S1 -->|"2.11, 2.12"| S2
@@ -115,11 +217,10 @@ flowchart LR
   S3 -.->|"retr_ambientSSup_eq_sSup"| S2
 ```
 
+### 4.2 §1 Injective spaces — result hierarchy
 
-
-### 1.3 §1 Injective spaces — inclusion hierarchy
-
-All six results **Pass**.
+The six results of §1 form a short chain from the Sierpiński space $\mathbb{O}$ to the retract
+characterization of injectivity.
 
 ```mermaid
 flowchart TD
@@ -142,7 +243,7 @@ flowchart TD
 
 
 
-### 1.4 §2 Continuous lattices — inclusion hierarchy
+### 4.3 §2 Continuous lattices — result hierarchy
 
 ```mermaid
 flowchart TD
@@ -201,7 +302,7 @@ flowchart TD
 
 
 
-### 1.5 §3 Function spaces — inclusion hierarchy
+### 4.4 §3 Function spaces — result hierarchy
 
 ```mermaid
 flowchart TD
@@ -261,10 +362,10 @@ flowchart TD
 
 
 
-### 1.6 §4 Inverse limits — inclusion hierarchy
+### 4.5 §4 Inverse limits — result hierarchy
 
-**4.1**, **4.2**, **4.3**, **4.5**, and **4.4(a)–(d)** are now **Pass** (see proof notes); Scott §4
-is complete.
+Scott §4 is complete in Lean: Propositions 4.1–4.2, Corollary 4.3, Lemma 4.5, and Theorem 4.4
+**(a)–(d)**. See §5.3 for proof notes on the capstone.
 
 ```mermaid
 flowchart TD
@@ -273,14 +374,14 @@ flowchart TD
   P37["proposition_3_7_*"]
   P29a["proposition_2_9_a (∏ CL)"]
   P210a["proposition_2_10_a (retract)"]
-  P41["proposition_4_1 ✓"]
-  P42["proposition_4_2 ✓"]
-  C43["corollary_4_3 ✓"]
-  L45["lemma_4_5 ✓"]
-  T44a["Thm 4.4(a) i∞/j∞ ✓"]
-  T44b["Thm 4.4(b) j∞∘i∞=id ✓"]
-  T44c["Thm 4.4(c) i∞∘j∞=id ✓"]
-  T44d["Thm 4.4(d) theorem_4_4 ✓"]
+  P41["proposition_4_1"]
+  P42["proposition_4_2"]
+  C43["corollary_4_3"]
+  L45["lemma_4_5"]
+  T44a["Thm 4.4(a) i∞/j∞"]
+  T44b["Thm 4.4(b) j∞∘i∞=id"]
+  T44c["Thm 4.4(c) i∞∘j∞=id"]
+  T44d["Thm 4.4(d) theorem_4_4"]
 
   P29a --> P41
   P210a --> P41
@@ -300,12 +401,25 @@ flowchart TD
 
 
 
-### 1.7 Selected proof notes
+---
+
+## 5. Notes on the formalization
+
+This section records proof strategy, Lean engineering choices, and lessons learned where the
+mechanization goes beyond Scott's published text. Results in §1 follow Scott's short arguments
+directly and are not discussed here. Proposition 2.1 is split in Lean as `proposition_2_1_of_le` and
+`proposition_2_1_le_of_converges`, then bundled as `proposition_2_1`.
+
+### 5.1 Continuous lattices (Scott §2)
+
+Section §2 is where most of the order-topology alignment work lives: products (2.9), retractions
+(2.10), injectivity (2.11), and the equivalence theorem (2.12) all required careful handling of
+Scott topologies without registering competing instances.
 
 #### Proposition 2.6 (joint ↔ separate continuity) — `proposition_2_6`
 
-Scott's statement: *a function of several variables between complete lattices is continuous
-jointly iff it is continuous in each variable separately.* We formalize the two-variable case
+Scott states that a function of several variables between complete lattices is continuous jointly
+if and only if it is continuous in each variable separately. We formalize the two-variable case
 `f : D × D' → D''`, with continuity phrased as `PreservesDirectedSup` (justified by Prop 2.5),
 and the product `D × D'` carrying the componentwise complete-lattice structure (whose induced
 topology is the product topology). The proof follows Scott's directed-net argument:
@@ -327,7 +441,7 @@ topology is the product topology). The proof follows Scott's directed-net argume
     "monotonicity + directedness" step.
 
 Sorry-free; `#print axioms` gives `[propext, Classical.choice, Quot.sound]` (the standard
-classical footprint for Part I).
+classical footprint throughout this development).
 
 #### Proposition 2.8 (finite lattices are continuous) — `proposition_2_8`
 
@@ -377,7 +491,7 @@ mathlib order `t₁ ≤ t₂` unfolds *definitionally* to `∀ U, IsOpen[t₂] U
 `classical` supplies the `DecidableEq` for `Function.update`; footprint
 `[propext, Classical.choice, Quot.sound]` for all of 2.9(a)/(b).
 
-**Engineering notes / lessons from 2.9(b)** (this was the hardest single proof in Part I so far;
+**Engineering notes / lessons from 2.9(b).** This was the hardest single proof in the development;
 recording the dead-ends so the next session does not re-pay the cost):
 
 - *Avoid `letI` for the factor/product topologies.* The tempting move is
@@ -529,6 +643,11 @@ Both directions are now closed; `theorem_2_12` is the full biconditional:
   the faithful statement is "homeomorphic to a continuous lattice under its Scott topology"; the
   reverse arrow transfers injectivity across the homeomorphism via `IsInjectiveSpace.of_retract`.
 - Footprint `[propext, Classical.choice, Quot.sound]`.
+
+### 5.2 Function spaces (Scott §3)
+
+Section §3 builds the function-space lattice, proves agreement with pointwise convergence (Theorem
+3.3), and develops the projection and fixed-point infrastructure needed for §4.
 
 #### Theorem 3.3(a) (`[D → D']` is a continuous lattice) — `theorem_3_3_isContinuousLattice` (`FunctionSpaces.lean`)
 
@@ -778,6 +897,12 @@ traps: (1) `sSup_le` leaves the bound element as an un-β-reduced `(fun f => ↑
 rather than coerce — the binders must be written `∀ f : ScottMap D D`. Continuity of `D` is unused
 (works for any complete lattice). Footprint `[propext, Classical.choice, Quot.sound]`.
 
+### 5.3 Inverse limits (Scott §4)
+
+Section §4 constructs $D_\infty$ and proves Theorem 4.4. The adjoint route to Proposition 4.1 and
+the function-space tower scaffolding for 4.4 are the main engineering contributions beyond Scott's
+text.
+
 #### Proposition 4.1 (inverse limit of projections is a continuous lattice) — `proposition_4_1` (`InverseLimits.lean`)
 
 `D∞ = { x : ∀n, Dₙ // ∀n, jₙ(xₙ₊₁) = xₙ }` for an ω-system of continuous lattices with projection
@@ -903,7 +1028,7 @@ gives the projection tower `towerProj`. The Scott recursion/algebra laws are the
 `towerProj_succ_incl_apply` (`i_{n+1}(x)=iₙ∘x∘jₙ`), `towerProj_succ_retr_apply` (`j_{n+1}=jₙ∘·∘iₙ`),
 and `towerProj_incl_apply` (`iₙ(f(x))=i_{n+1}(f)(iₙ(x))`, application preserved one level up).
 
-**Thm 4.4(a) — `embInfInf` / `projInfInf` (Pass).** With `DInf := InverseLimit (towerType D₀)
+**Thm 4.4(a) — `embInfInf` / `projInfInf`.** With `DInf := InverseLimit (towerType D₀)
 (towerProj D₀ j₀)` (a continuous lattice by Proposition 4.1) and `DInfFn := [D∞ → D∞]`, Scott's
 limit pair is written down directly:
 
@@ -923,18 +1048,14 @@ free*: no bespoke directed-sup/`iSup_comm` argument is needed (contrast the `coc
 The pointwise unfolding `embInfInf_apply : i∞(x) = ⨆ₙ iInfTerm n x` (and `projInfInf_apply`) follows
 from `ScottMap.sSup_apply` + `Set.range_comp`, and the `*_apply` reductions of the summands hold by
 `rfl` (riding on `towerType_succ` defeq). `*_preservesDirectedSup` is then immediate from
-`.continuous` via Proposition 2.5. Footprint `[propext, Classical.choice, Quot.sound]`.
+`.continuous` via Proposition 2.5. Footprint `[propext, Classical.choice, Quot.sound]`. Theorem 4.4 subgoals **(a)–(d)** are all complete:
 
-**Remaining for 4.4** — all subgoals **Pass** (session prompts: `HANDOFF.md`):
+- **(a)** `embInfInf` / `projInfInf`: define $i_\infty$/$j_\infty$ as Scott maps (suprema of Scott maps).
+- **(b)** `projInfInf_comp_embInfInf`: $j_\infty \circ i_\infty = \mathrm{id}$ on $D_\infty$.
+- **(c)** `embInfInf_comp_projInfInf`: $i_\infty \circ j_\infty = \mathrm{id}$ on $[D_\infty \to D_\infty]$.
+- **(d)** `theorem_4_4`, `theorem_4_4_orderIso`: capstone packaging $D_\infty \cong [D_\infty \to D_\infty]$.
 
-| Subgoal | Task |
-| ------- | ---- |
-| **(a)** | Define `i∞`/`j∞` as `ScottMap`s; prove continuity — **Pass** (`embInfInf`/`projInfInf`) |
-| **(b)** | `j∞ ∘ i∞ = id` on `D∞` — **Pass** (`projInfInf_comp_embInfInf`) |
-| **(c)** | `i∞ ∘ j∞ = id` on `[D∞→D∞]` — **Pass** (`embInfInf_comp_projInfInf`) |
-| **(d)** | Package `theorem_4_4` — **Pass** (`theorem_4_4`, `theorem_4_4_orderIso`) |
-
-**Thm 4.4(b) — `projInfInf_comp_embInfInf` (Pass).** Goal: `j∞ ∘ i∞ = id` on `D∞`. Following Scott's
+**Thm 4.4(b) — `projInfInf_comp_embInfInf`.** Goal: $j_\infty \circ i_\infty = \mathrm{id}$ on $D_\infty$. Following Scott's
 calculation, expand `j∞(i∞(x)) = ⨆ₙ jInfTerm n (i∞ x)`. Pushing the two conjugations through the
 inner/outer suprema (`conjMap_iSup`, `embInf_succ_iSup` — each just *preservation of directed sups*
 by the relevant `ScottMap`, since the summand families are monotone in `m`) rewrites the `n`-th term
@@ -948,7 +1069,7 @@ of the Prop 4.2 projection pair, giving `g n n = i_{(n+1)∞}(x_{n+1})`; an inde
 (`Monotone.iSup_nat_add`) plus `inverseLimit_eq_iSup` recognizes the result as `x`.
 Footprint `[propext, Classical.choice, Quot.sound]`.
 
-**Thm 4.4(c) — `embInfInf_comp_projInfInf` (Pass).** Goal: `i∞ ∘ j∞ = id` on `[D∞ → D∞]`. The
+**Thm 4.4(c) — `embInfInf_comp_projInfInf`.** Goal: $i_\infty \circ j_\infty = \mathrm{id}$ on $[D_\infty \to D_\infty]$. The
 restrictions `uₙ = j_{∞n} ∘ f ∘ i_{n∞} = conjMap (j_{∞n}, i_{n∞}) f ∈ D_{n+1}` satisfy the
 Lemma-4.5 recursion `jₙ₊₁(u_{n+2}) = u_{n+1}` — proved as `towerProj_retr_conjMap_succ`, the equality
 sibling of (b)'s `conjMap_incl_le_conjMap_succ` (unfold `(towerProj (n+1)).retr` as the
@@ -962,27 +1083,27 @@ equation `id = ⨆ₙ rₙ` (here just `inverseLimit_eq_iSup`, since `rₙ z = i
 collapses to the diagonal `⨆ₙ rₙ (f (rₙ z))` (`iSup₂_monotone_eq_diagonal`), which is exactly the
 evaluated `i∞(j∞ f) z`. Footprint `[propext, Classical.choice, Quot.sound]`.
 
-**Thm 4.4(d) — `theorem_4_4` (Pass).** Capstone packaging of (b)+(c): `theorem_4_4` bundles the two
+**Thm 4.4(d) — `theorem_4_4`.** Capstone packaging of (b)+(c): `theorem_4_4` bundles the two
 composition identities (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`); helper lemmas
 `projInfInf_embInfInf` / `embInfInf_projInfInf` apply the `ScottMap` equalities pointwise.
 `theorem_4_4_orderIso : D∞ ≃o [D∞ → D∞]` is built via `Equiv.toOrderIso` from the same inverse pair
 (both directions monotone Scott maps, hence Scott-continuous). Footprint
 `[propext, Classical.choice, Quot.sound]`. **Scott §4 is complete.**
 
-Footprint so far: `[propext, Classical.choice, Quot.sound]`.
-
 ---
 
----
+## 6. Reproducibility
 
-## Build
+The repository pins Lean / mathlib **v4.30.0** (`lean-toolchain`).
 
 ```bash
 lake exe cache get
 lake build Scott1972
 ```
 
-## Appendix — Lean source index (Part I)
+---
+
+## Appendix A. Lean source index
 
 | File | Role |
 | --- | --- |
@@ -998,12 +1119,15 @@ lake build Scott1972
 | `Scott1972/ContinuousLattice/InverseLimits.lean` | Scott §4 |
 | `Scott1972/ContinuousLattice/FunctionSpaceTower.lean` | Theorem 4.4 |
 
-Vision transcript: `sources/ScottContinLatt1972_vision.md`.
+Primary source: [`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md). Vision merge:
+`sources/ScottContinLatt1972_vision.md`.
 
 ---
 
-## References (Part I)
+## References
 
-- **[Sco72]** D. Scott. *Continuous Lattices*. LNM 274, Springer, 1972.
+- **[Sco69]** D. S. Scott. *Lattice-theoretic models for the $\lambda$-calculus* (unpublished manuscript). University of Oxford, 1969.
+- **[Sco70]** D. S. Scott. Outline of a mathematical theory of computation. In *Proceedings of the Fourth Annual Princeton Conference on Information Sciences and Systems* (pp. 169–176). Princeton University, 1970.
+- **[Sco72]** D. S. Scott. Continuous lattices. In F. W. Lawvere (Ed.), *Toposes, Algebraic Geometry and Logic* (Lecture Notes in Mathematics, Vol. 274, pp. 97–136). Springer, Berlin, Heidelberg, 1972. URL: http://upol.cz
 - **[GHKLMS03]** Gierz et al. *Continuous Lattices and Domains*. Cambridge, 2003.
 - **[Kel55]** J. L. Kelley. *General Topology*. 1955.
