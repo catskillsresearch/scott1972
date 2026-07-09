@@ -3,6 +3,8 @@
 
 # scott1972
 
+Paper: [https://arxiv.org/abs/2606.30782](https://arxiv.org/abs/2606.30782)
+
 Lean 4 formalization of Dana Scott's **1972** *Continuous Lattices* (LNM 274):
 injective `T₀`-spaces, Scott topology, way-below, function spaces, inverse limits.
 
