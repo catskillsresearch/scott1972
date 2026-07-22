@@ -1,0 +1,65 @@
+{
+  "title": "A Lean 4 Formalization of Scott's Continuous Lattices (1972)",
+  "upload_type": "software",
+  "access_right": "open",
+  "language": "eng",
+  "version": "1.0.0",
+  "description": "Complete machine-checked Lean 4 formalization of Dana Scott's 1972 paper Continuous Lattices (LNM 274), including the March 1972 Milner correction. Formalizes 43 numbered results from Sections 1--4 (injective T0-spaces, continuous lattices, Scott topology, way-below, projections, function spaces, inverse limits, and Theorem 4.4: D∞ ≅ [D∞ → D∞]). Sorry-free; classical footprint [propext, Classical.choice, Quot.sound]. Primary readable artifact: arxiv.pdf. Source repository: https://github.com/catskillsresearch/scott1972. Companion preprint: https://arxiv.org/abs/2606.30782",
+  "creators": [
+    {
+      "name": "Ericson, Lars Warren",
+      "affiliation": "Catskills Research Company",
+      "orcid": "0000-0001-8299-9361"
+    }
+  ],
+  "keywords": [
+    "Lean 4",
+    "mathlib",
+    "formal verification",
+    "continuous lattices",
+    "domain theory",
+    "Scott topology",
+    "lambda calculus",
+    "denotational semantics",
+    "Dana Scott",
+    "D-infinity"
+  ],
+  "subjects": [
+    {
+      "term": "Lambda calculus",
+      "identifier": "http://id.loc.gov/authorities/subjects/sh85074216",
+      "scheme": "url"
+    },
+    {
+      "term": "Lattice theory",
+      "identifier": "http://id.loc.gov/authorities/subjects/sh85074991",
+      "scheme": "url"
+    },
+    {
+      "term": "Denotational semantics",
+      "identifier": "http://id.loc.gov/authorities/subjects/sh85036781",
+      "scheme": "url"
+    },
+    {
+      "term": "Automatic theorem proving",
+      "identifier": "http://id.loc.gov/authorities/subjects/sh85010112",
+      "scheme": "url"
+    }
+  ],
+  "license": "Apache-2.0",
+  "notes": "Software and Lean sources are Apache-2.0 (see LICENSE). Readable paper PDF is arxiv.pdf in this deposit. Prepared with LLM assistance; all Lean proofs are machine-checked.",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/catskillsresearch/scott1972",
+      "relation": "isSupplementTo",
+      "scheme": "url",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "2606.30782",
+      "relation": "isDocumentedBy",
+      "scheme": "arxiv",
+      "resource_type": "publication-preprint"
+    }
+  ]
+}

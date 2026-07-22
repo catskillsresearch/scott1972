@@ -1115,22 +1115,11 @@ formalization route, and every formal claim in this work. Following standard pub
 (e.g., COPE guidance on authorship and AI tools **[COPE24]**), **no large language model is listed
 as a co-author** — authorship implies an accountability that automated systems cannot bear.
 
-We gratefully acknowledge assistance from the following tools:
+We gratefully acknowledge assistance from the following tools (auto-generated from
+`scripts/ai_model_cards.py` when building `arxiv.tex`):
 
-- **Cursor** **[Cur26]** — agent-assisted editing in the Cursor IDE: formalizing Scott's 1972
-  continuous-lattice layer in Lean 4 / mathlib, `lake build` repair, vision-OCR transcription,
-  drafting this narrative (`arxiv.md`), and tracking the formalized inventory. Generated Lean was
-  provisional until it compiled under the pinned toolchain.
-- **Cursor Composer 2.5 Fast** **[Cmp25]** — routine multi-step work: module scaffolding,
-  dependency-ordered wiring of `Scott1972/ContinuousLattice/`, documentation and Mermaid
-  blueprints, and medium proof obligations where the strategy was already fixed. Per its model
-  card, Composer 2.5 is optimized for codebase navigation rather than open-ended topological proof
-  design; the Milner-block results (2.9–2.11, full 3.3) were not delegated to it alone.
-- **Anthropic Claude Opus 4.8 (high reasoning)** **[Ant26]** — selective use for the heaviest proof
-  work (Propositions 2.9–2.11, Theorem 2.12, Theorem 3.3, Propositions 3.8–3.10, Theorem 4.4).
-  Every emitted proof term was checked by the Lean kernel.
-- **Google Gemini 3.5 Flash** **[Gem25]** — exploratory passes on Scott's typographic conventions
-  (ambient vs subspace joins in the Milner correction) and scope decisions.
+<!-- AI_MODEL_TOOL_BULLETS -->
+<!-- /AI_MODEL_TOOL_BULLETS -->
 
 All definitions, constructivity audits, and final prose were reviewed by the human author, who takes
 full responsibility for them.
@@ -1153,7 +1142,5 @@ builds `arxiv_with_code.md` from this file plus the complete Lean source.
 - **[Kel55]** J. L. Kelley. *General Topology*. D. Van Nostrand Company, 1955.
 - **[SR72]** Catskills Research. *scott1972* (this work). <https://github.com/catskillsresearch/scott1972>.
 - **[COPE24]** Committee on Publication Ethics (COPE). *Authorship and AI tools: COPE position statement*. 2024. <https://publicationethics.org/guidance/cope-position/authorship-and-ai-tools>
-- **[Cur26]** Anysphere, Inc. *Cursor: AI-native code editor and agent environment*. <https://cursor.com> (accessed 2026).
-- **[Cmp25]** Anysphere, Inc. *Composer 2.5*. Model announcement and documentation, <https://cursor.com/blog/composer-2-5>; model card as integrated in Cursor, <https://cursor.com/docs/models> (accessed 2026).
-- **[Ant26]** Anthropic. *Claude Opus 4.8* (high thinking/reasoning variant). System card and announcement, <https://www.anthropic.com/news/claude-opus-4-8>; model documentation as integrated in Cursor, <https://cursor.com/docs/models/claude-opus-4-8> (accessed 2026).
-- **[Gem25]** Google DeepMind. *Gemini 3.5 Flash*. Technical documentation and model cards. <https://ai.google.dev/gemini-api/docs/models> (accessed 2026).
+<!-- AI_MODEL_REFERENCES -->
+<!-- /AI_MODEL_REFERENCES -->

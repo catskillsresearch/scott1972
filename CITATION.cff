@@ -1,0 +1,39 @@
+# Citation File Format — GitHub “Cite this repository.”
+# Authoritative Zenodo metadata (subjects, resource type, relations): .zenodo.json
+
+cff-version: 1.2.0
+title: "A Lean 4 Formalization of Scott's Continuous Lattices (1972)"
+message: "If you use this formalization, please cite it as below."
+type: software
+authors:
+  - family-names: Ericson
+    given-names: Lars Warren
+    affiliation: Catskills Research Company
+    orcid: "https://orcid.org/0000-0001-8299-9361"
+abstract: >-
+  Complete machine-checked Lean 4 formalization of Dana Scott's 1972 paper
+  Continuous Lattices (LNM 274), including the March 1972 Milner correction.
+  Formalizes 43 numbered results through Theorem 4.4 (D∞ ≅ [D∞ → D∞]).
+keywords:
+  - Lean 4
+  - continuous lattices
+  - domain theory
+  - Scott topology
+  - lambda calculus
+  - formal verification
+repository-code: "https://github.com/catskillsresearch/scott1972"
+license: Apache-2.0
+version: 1.0.0
+date-released: 2026-07-22
+url: "https://arxiv.org/abs/2606.30782"
+# After Zenodo publish, add preferred-citation.doi here.
+preferred-citation:
+  type: software
+  title: "A Lean 4 Formalization of Scott's Continuous Lattices (1972)"
+  authors:
+    - family-names: Ericson
+      given-names: Lars Warren
+  year: 2026
+  version: 1.0.0
+  url: "https://github.com/catskillsresearch/scott1972"
+  notes: "Deposit dist/scott1972-zenodo.zip on Zenodo for a DOI; source lives on GitHub."

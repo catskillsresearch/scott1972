@@ -10,7 +10,8 @@ Pipeline:
      the numbering and we never get duplicates like "5.1 5.1".
   5. Replace fenced code with \\lstinputlisting blocks (ASCII-sanitized for arXiv pdfLaTeX).
   5b. Render ```mermaid blocks to vector PDFs via mermaid-cli (mmdc).
-  6. pandoc → LaTeX, then splice the listing/math/figure placeholders back in.
+  6. Inject AI model-card acknowledgements from `scripts/ai_model_cards.py` (before HTML-comment strip).
+  7. pandoc → LaTeX, then splice the listing/math/figure placeholders back in.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS))
+from ai_model_cards import inject_model_cards
 from lean_listing_sanitize import chunk_line_ranges, sanitize_lean_for_arxiv
 
 SRC = ROOT / "arxiv_with_code.md"
@@ -357,6 +359,7 @@ def main() -> int:
 
     raw = SRC.read_text(encoding="utf-8")
     body = drop_github_nav(raw)
+    body = inject_model_cards(body)
     body = strip_html_comments(body)
     body = normalize_appendix_headings(body)
     abstract_md, body = extract_abstract(body)
