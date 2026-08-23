@@ -50,10 +50,10 @@ write_lean Solution "${tmp}/SolutionTypes.lean"
 
 lake env lean "${tmp}/ChallengeTypes.lean" 2>/dev/null \
   | grep -vE 'LEAN_PATH|trace:|warning:|declaration uses' \
-  >"${tmp}/challenge.txt" || true
+  >"${tmp}/challenge.txt"
 lake env lean "${tmp}/SolutionTypes.lean" 2>/dev/null \
   | grep -vE 'LEAN_PATH|trace:|warning:|declaration uses' \
-  >"${tmp}/solution.txt" || true
+  >"${tmp}/solution.txt"
 
 # Palomar Comparator BEqs ConstantVal.levelParams, so `.{u_3}` vs `.{u_2}`
 # is a rejection. Do not strip universe names. A secondary stripped view is
@@ -62,12 +62,14 @@ normalize_instances() {
   sed -E 's/\.\{u_[0-9]+(,[ ]*u_[0-9]+)*\}//g; s/u_[0-9]+/u/g'
 }
 
-echo "== Challenge (pp.all + pp.fullNames) =="
-cat "${tmp}/challenge.txt"
-echo
-echo "== Solution (pp.all + pp.fullNames) =="
-cat "${tmp}/solution.txt"
-echo
+if [[ "${PALOMAR_QUIET:-0}" != 1 ]]; then
+  echo "== Challenge (pp.all + pp.fullNames) =="
+  cat "${tmp}/challenge.txt"
+  echo
+  echo "== Solution (pp.all + pp.fullNames) =="
+  cat "${tmp}/solution.txt"
+  echo
+fi
 if diff -u "${tmp}/challenge.txt" "${tmp}/solution.txt"; then
   echo "OK: Challenge and Solution names, universes, and types match."
 else
@@ -117,10 +119,21 @@ write_definition_dump Challenge "${tmp}/ChallengeDefinitions.lean"
 write_definition_dump Solution "${tmp}/SolutionDefinitions.lean"
 lake env lean "${tmp}/ChallengeDefinitions.lean" 2>/dev/null \
   | grep -vE 'LEAN_PATH|trace:|warning:|declaration uses' \
-  >"${tmp}/challenge-definitions.txt" || true
+  >"${tmp}/challenge-definitions.txt"
 lake env lean "${tmp}/SolutionDefinitions.lean" 2>/dev/null \
   | grep -vE 'LEAN_PATH|trace:|warning:|declaration uses' \
-  >"${tmp}/solution-definitions.txt" || true
+  >"${tmp}/solution-definitions.txt"
+
+# Inline structure proofs elaborate to private constants such as
+# `instPartialOrder._proof_4`. Their generated values can differ between the
+# modules even when the source proposition is identical. Require every proof
+# boundary in a locked value to be a stable, named theorem target instead.
+if grep -nE '\._proof_[0-9]+' \
+    "${tmp}/challenge-definitions.txt" "${tmp}/solution-definitions.txt"; then
+  echo "FAIL: a locked definition depends on an anonymous generated proof."
+  echo "Move the field proof to a named theorem and add it to theorem_names."
+  exit 1
+fi
 
 if diff -u "${tmp}/challenge-definitions.txt" "${tmp}/solution-definitions.txt"; then
   echo "OK: concrete lattice and projection-tower definition bodies match."

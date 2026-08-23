@@ -22,5 +22,5 @@ jobs:
       - name: Configure Lake cache
         run: lake exe cache get || true
 
-      - name: Build project
-        run: lake build
+      - name: Run Palomar preflight
+        run: scripts/palomar_preflight.sh

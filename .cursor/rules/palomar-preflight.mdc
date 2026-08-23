@@ -1,0 +1,17 @@
+---
+description: Prevent Palomar Comparator mismatches in Challenge/Solution declarations
+globs: "{Challenge.lean,Solution.lean,comparator.json,Scott1972/**/*.lean,scripts/*palomar*,scripts/compare_challenge_solution_types.sh}"
+alwaysApply: false
+---
+
+# Palomar Comparator safety
+
+- Read `docs/PALOMAR_STYLE.md` before changing compared declarations.
+- Pin universe parameter names and make unstable instance paths explicit.
+- Keep definition-locked Challenge/Solution bodies structurally identical.
+- Never use inline proofs in locked structure values: generated
+  `._proof_N` constants are mechanically compared.
+- Move proof fields to named theorems and list them in `theorem_names`.
+- Challenge may contain proof holes; Solution and `Scott1972/**/*.lean` may not.
+- Run `scripts/palomar_preflight.sh` after relevant edits and before a
+  submission commit. Do not claim readiness unless it passes.
