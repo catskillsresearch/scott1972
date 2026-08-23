@@ -13,8 +13,9 @@ $T_0$-spaces---those with a strong extension property for continuous maps---and 
 exactly the *continuous lattices*: complete lattices whose Scott topology is determined by the
 order via the way-below relation ($\ll$). On this foundation he studies projections, retractions,
 products, function spaces, and inverse limits. The capstone (Theorem 4.4) constructs an inverse
-limit $D_\infty$ of function-space approximants and proves $D_\infty \cong [D_\infty \to D_\infty]$,
-yielding a purely mathematical model for Church's untyped $\lambda$-calculus.
+limit $D_\infty$ of function-space approximants and proves that $D_\infty$ is homeomorphic to
+its own function space $[D_\infty \to D_\infty]$, yielding a purely mathematical model for
+Church's untyped $\lambda$-calculus.
 
 Our development formalizes **43 numbered results** from Scott's Sections 1--4 (Propositions, Corollaries,
 Lemmas, and Theorems), each as a sorry-free Lean theorem, together with supporting infrastructure
@@ -97,7 +98,7 @@ Scott organizes the paper in four technical sections (following an introductory 
 | §1 | **Injective spaces** | Definition of injectivity; $\mathbb{O}$ and its powers; retract characterization (Cor. 1.6–1.7) |
 | §2 | **Continuous lattices** | Way-below ($\ll$), Scott topology, Scott-continuous maps; products and retractions; injectivity ⟺ continuous lattice (Thm. 2.12) |
 | §3 | **Function spaces** | $[D \to D']$ as a continuous lattice (Thm. 3.3); $\lambda$-abstraction, evaluation, projections, fixed points |
-| §4 | **Inverse limits** | $D_\infty$ as inverse/direct limit; capstone $D_\infty \cong [D_\infty \to D_\infty]$ (Thm. 4.4) |
+| §4 | **Inverse limits** | $D_\infty$ as inverse/direct limit; capstone $D_\infty$ homeomorphic to $[D_\infty \to D_\infty]$ (Thm. 4.4) |
 
 Our working source text is [`sources/ScottContinLatt1972.md`](sources/ScottContinLatt1972.md): a plain-text OCR
 transcription of **[Sco72]** through the Milner correction (pp. 135–136). Image-based PDFs are
@@ -191,7 +192,7 @@ both Scott and Lean.
 | 4 | Thm 4.4(a) | `embInfInf`, `projInfInf`, `iInfTerm`, `jInfTerm`, `*_apply`, `*_preservesDirectedSup` | `FunctionSpaceTower.lean` |
 | 4 | Thm 4.4(b) | `projInfInf_comp_embInfInf` | `FunctionSpaceTower.lean` |
 | 4 | Thm 4.4(c) | `embInfInf_comp_projInfInf` | `FunctionSpaceTower.lean` |
-| 4 | Thm 4.4(d) | `theorem_4_4`, `theorem_4_4_orderIso` | `FunctionSpaceTower.lean` |
+| 4 | Thm 4.4(d) | `theorem_4_4`, `theorem_4_4_inverses`, `theorem_4_4_homeomorph`, `theorem_4_4_orderIso` | `FunctionSpaceTower.lean` |
 
 ### 4.1 Proof dependency structure
 
@@ -373,7 +374,7 @@ flowchart TD
   T44a["Thm 4.4(a) i∞/j∞"]
   T44b["Thm 4.4(b) j∞∘i∞=id"]
   T44c["Thm 4.4(c) i∞∘j∞=id"]
-  T44d["Thm 4.4(d) theorem_4_4"]
+  T44d["Thm 4.4(d) homeomorph"]
 
   P29a --> P41
   P210a --> P41
@@ -1044,7 +1045,7 @@ from `ScottMap.sSup_apply` + `Set.range_comp`, and the `*_apply` reductions of t
 - **(a)** `embInfInf` / `projInfInf`: define $i_\infty$/$j_\infty$ as Scott maps (suprema of Scott maps).
 - **(b)** `projInfInf_comp_embInfInf`: $j_\infty \circ i_\infty = \mathrm{id}$ on $D_\infty$.
 - **(c)** `embInfInf_comp_projInfInf`: $i_\infty \circ j_\infty = \mathrm{id}$ on $[D_\infty \to D_\infty]$.
-- **(d)** `theorem_4_4`, `theorem_4_4_orderIso`: capstone packaging $D_\infty \cong [D_\infty \to D_\infty]$.
+- **(d)** `theorem_4_4`: Scott's statement — $D_\infty$ is a continuous lattice homeomorphic to $[D_\infty \to D_\infty]$; `theorem_4_4_inverses` is the inverse pair in the proof; `theorem_4_4_homeomorph` packages that pair as a homeomorphism; `theorem_4_4_orderIso` is the companion lattice isomorphism from Scott's abstract.
 
 **Thm 4.4(b) — `projInfInf_comp_embInfInf`.** Goal: $j_\infty \circ i_\infty = \mathrm{id}$ on $D_\infty$. Following Scott's
 calculation, expand `j∞(i∞(x)) = ⨆ₙ jInfTerm n (i∞ x)`. Pushing the two conjugations through the
@@ -1074,11 +1075,15 @@ equation `id = ⨆ₙ rₙ` (here just `inverseLimit_eq_iSup`, since `rₙ z = i
 collapses to the diagonal `⨆ₙ rₙ (f (rₙ z))` (`iSup₂_monotone_eq_diagonal`), which is exactly the
 evaluated `i∞(j∞ f) z`. Footprint `[propext, Classical.choice, Quot.sound]`.
 
-**Thm 4.4(d) — `theorem_4_4`.** Capstone packaging of (b)+(c): `theorem_4_4` bundles the two
-composition identities (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`); helper lemmas
-`projInfInf_embInfInf` / `embInfInf_projInfInf` apply the `ScottMap` equalities pointwise.
-`theorem_4_4_orderIso : D∞ ≃o [D∞ → D∞]` is built via `Equiv.toOrderIso` from the same inverse pair
-(both directions monotone Scott maps, hence Scott-continuous). Footprint
+**Thm 4.4(d) — `theorem_4_4`.** Scott's statement: $D_\infty$ is a continuous lattice and is
+homeomorphic to $[D_\infty \to D_\infty]$. `theorem_4_4_inverses` bundles the two composition
+identities from the proof (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`); helper
+lemmas `projInfInf_embInfInf` / `embInfInf_projInfInf` apply those equalities pointwise.
+`theorem_4_4_homeomorph` packages that pair as a homeomorphism of Scott topologies.
+`theorem_4_4` conjoins Proposition 4.1 (continuous lattice) with that homeomorphism.
+`theorem_4_4_orderIso` is the companion lattice isomorphism (Scott's abstract: “homeomorphic
+(and isomorphic)”); it is not the numbered theorem. The Palomar compared claim is `theorem_4_4`.
+Footprint
 `[propext, Classical.choice, Quot.sound]`. **Scott §4 is complete.**
 
 ---
@@ -1105,6 +1110,7 @@ bash scripts/package_arxiv_submit.sh       # → dist/arxiv_submit.zip only (ski
 ## Acknowledgments
 
 - **Dana Scott** — *Continuous Lattices* **[Sco72]**, the paper this development formalizes.
+  Scott was not contacted and did not participate in or endorse the formalization.
 - **Robin Milner** — the March 1972 correction to **[Sco72]**, without which Propositions 2.9, 2.10,
   and 3.3 would be wrong as originally stated.
 

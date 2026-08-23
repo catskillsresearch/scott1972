@@ -4,6 +4,10 @@ This repository is a standalone Lean 4 formalization of Dana Scott's 1972
 paper *Continuous Lattices* (LNM 274). It is not a thin wrapper and not a
 reimplementation of an independent formalization.
 
+Dana Scott did not participate in, review, or endorse this formalization.
+The formalization was produced by Lars Warren Ericson without input from
+Scott. The source paper is cited as literature only.
+
 A cross-presentation equivalence package for Scott's 1972 / 1980 / 1982
 material previously lived in
 [`catskillsresearch/scott_models`](https://github.com/catskillsresearch/scott_models)
@@ -12,10 +16,10 @@ process glitch. **This repository is submitted to Palomar on its own**, for
 the 1972 paper alone, following the same Challenge / Solution pattern as
 [`catskillsresearch/cardb`](https://github.com/catskillsresearch/cardb).
 
-The compared Palomar claim is Scott's domain equation (Theorem 4.4): a
-continuous lattice `D_∞` order-isomorphic to its function space
-`[D_∞ → D_∞]`. The full §2–§4 development lives in `Scott1972/ContinuousLattice/*`;
-`Challenge.lean` states only the headline theorem and the definitions it mentions.
+The compared Palomar claim is Scott's Theorem 4.4: the inverse limit `D_∞`
+of the function-space tower is a continuous lattice homeomorphic, in the
+Scott topology, to `[D_∞ → D_∞]`. The full §2–§4 development lives in
+`Scott1972/ContinuousLattice/*`.
 
 Palomar reviews and, if registered, preserves a pinned commit of *this*
 repository.

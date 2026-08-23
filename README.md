@@ -21,7 +21,7 @@ The pin is `leanprover/lean4:v4.33.0` (same as [`qlambda`](../qlambda)).
 | `arxiv.md` | Formalization narrative and theorem inventory |
 | `sources/ScottContinLatt1972.md` | OCR source text (Scott 1972 through Milner correction) |
 | `Scott1972/` | Sorry-free formalization of the paper |
-| `Challenge.lean` | Palomar statement of record: domain-equation theorem + definitions |
+| `Challenge.lean` | Palomar statement of record: Theorem 4.4 + definitions |
 | `Solution.lean` | Palomar solution module: imports `Scott1972/*` proofs |
 | `comparator.json` | Comparator config for the compared theorem and definitions |
 | `formalization.yaml` | Palomar / formalization.yaml v0.4 metadata |
@@ -41,6 +41,7 @@ Palomar submission, run:
 bash scripts/compare_challenge_solution_types.sh
 ```
 
-`Challenge.lean` imports only Mathlib and states `exists_scott_domain_domain_equation`
-with a deliberate `sorry`. The proof is in `Solution.lean` via `theorem_4_4_orderIso`.
+`Challenge.lean` imports only Mathlib and states `theorem_4_4` in the wording of
+`sources/ScottContinLatt1972.md` (Theorem 4.4) with a deliberate `sorry`. The
+proof is in `FunctionSpaceTower.lean`, imported by `Solution.lean`.
 The compared theorem uses `propext`, `Classical.choice`, and `Quot.sound` only.

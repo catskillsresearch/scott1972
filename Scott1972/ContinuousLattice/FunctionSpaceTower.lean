@@ -7,17 +7,20 @@ Github:  https://github.com/catskillsresearch/scott1972
 
 import Scott1972.ContinuousLattice.InverseLimits
 import Mathlib.Order.Hom.Basic
+import Mathlib.Topology.Homeomorph.Defs
 
 /-!
-# The function-space tower and Scott's `D_∞ ≅ [D_∞ → D_∞]` (Scott 1972, §4, Theorem 4.4)
+# The function-space tower and Theorem 4.4
+(Scott 1972; wording from `sources/ScottContinLatt1972.md`)
 
-Starting from a continuous lattice `D₀` together with a chosen projection `j₀ : [D₀ → D₀] → D₀`
-(Proposition 3.13 provides one), we build the recursively-defined ω-system
+Scott, just above Theorem 4.4: let \(D = D_0\) be a given continuous lattice; make
+\(D_0\) a projection of \(D_1 = [D_0 \to D_0]\) by a pair \(i_0, j_0\) (Proposition 3.13);
+define recursively \(D_{n+1} = [D_n \to D_n]\) and introduce \(i_{n+1}, j_{n+1}\) by
+Proposition 3.7, so \(j_{n+1} = [j_n \to j_n]\).
 
-  `D_{n+1} = [D_n → D_n]`,   `j_{n+1} = [j_n → j_n]`   (the function-space functor, Proposition 3.7),
-
-and form its inverse limit `D_∞`. Theorem 4.4 is that `D_∞` is *homeomorphic to its own function
-space* `[D_∞ → D_∞]`.
+**4.4 Theorem.** *The inverse limit \(D_\infty\) of the recursively defined sequence
+\(\langle D_n, j_n \rangle_{n=0}^{\infty}\) of function spaces is not only a continuous
+lattice, but it is also homeomorphic to its own function space \([D_\infty \to D_\infty]\).*
 -/
 
 namespace Scott1972.ContinuousLattice
@@ -588,10 +591,10 @@ theorem embInfInf_comp_projInfInf :
 
 end Thm44b
 
-/-! ### Theorem 4.4(d): capstone `D_∞ ≅ [D_∞ → D_∞]`
+/-! ### Theorem 4.4(d): `D_∞` is homeomorphic to `[D_∞ → D_∞]`
 
-Package the mutually-inverse Scott maps from (b) and (c). Scott's homeomorphism follows because
-`i_∞` and `j_∞` are Scott-continuous (`embInfInf` / `projInfInf` are bundled `ScottMap`s). -/
+Scott's statement of Theorem 4.4 is the homeomorphism. The maps `i_∞` and `j_∞` from (b) and (c)
+are mutually inverse and Scott-continuous (bundled `ScottMap`s), so they are that homeomorphism. -/
 
 section Thm44d
 
@@ -616,21 +619,50 @@ theorem embInfInf_le_iff (x y : DInf D₀ j₀) :
     rwa [projInfInf_embInfInf, projInfInf_embInfInf] at this
   · intro h; exact (embInfInf D₀ j₀).monotone h
 
-/-- **Scott 1972, §4 (Theorem 4.4).** The inverse limit `D_∞` of the function-space tower is
-order-isomorphic to its own function space `[D_∞ → D_∞]` via the mutually-inverse Scott maps
-`i_∞ = embInfInf` and `j_∞ = projInfInf`. -/
-theorem theorem_4_4 :
+/-- The inverse pair Scott writes down in the proof of Theorem 4.4:
+`i_∞ = embInfInf` and `j_∞ = projInfInf` satisfy `j_∞ ∘ i_∞ = id` and `i_∞ ∘ j_∞ = id`. -/
+theorem theorem_4_4_inverses :
     (projInfInf D₀ j₀).comp (embInfInf D₀ j₀) = ScottMap.idMap ∧
     (embInfInf D₀ j₀).comp (projInfInf D₀ j₀) = ScottMap.idMap :=
   ⟨projInfInf_comp_embInfInf D₀ j₀, embInfInf_comp_projInfInf D₀ j₀⟩
 
-/-- The order isomorphism `D_∞ ≃o [D_∞ → D_∞]` witnessing Theorem 4.4. Both directions are
-Scott-continuous (they are bundled `ScottMap`s), so this is the order-theoretic half of Scott's
-homeomorphism. -/
+/-- Lattice isomorphism along the same pair `i_∞`, `j_∞`. Scott's abstract also says the spaces
+are isomorphic; this is not the statement of Theorem 4.4 (that statement is the homeomorphism). -/
 noncomputable def theorem_4_4_orderIso : OrderIso (DInf D₀ j₀) (DInfFn D₀ j₀) :=
   (Equiv.mk (embInfInf D₀ j₀) (projInfInf D₀ j₀)
       (projInfInf_embInfInf D₀ j₀) (embInfInf_projInfInf D₀ j₀)).toOrderIso
     (embInfInf D₀ j₀).monotone (projInfInf D₀ j₀).monotone
+
+/-- The pair \(i_\infty, j_\infty\) from the proof of Theorem 4.4
+(`sources/ScottContinLatt1972.md`): “We can write down directly the pair of maps
+\(i_\infty, j_\infty\) that provide the homeomorphism.” -/
+noncomputable def theorem_4_4_homeomorph :
+    @Homeomorph (DInf D₀ j₀) (DInfFn D₀ j₀) scottTopologicalSpace scottTopologicalSpace :=
+  @Homeomorph.mk (DInf D₀ j₀) (DInfFn D₀ j₀) scottTopologicalSpace scottTopologicalSpace
+    (Equiv.mk (embInfInf D₀ j₀) (projInfInf D₀ j₀)
+      (projInfInf_embInfInf D₀ j₀) (embInfInf_projInfInf D₀ j₀))
+    (embInfInf D₀ j₀).continuous (projInfInf D₀ j₀).continuous
+
+/-- **Scott 1972, Theorem 4.4** (`sources/ScottContinLatt1972.md`):
+*The inverse limit \(D_\infty\) of the recursively defined sequence
+\(\langle D_n, j_n \rangle_{n=0}^{\infty}\) of function spaces is not only a
+continuous lattice, but it is also homeomorphic to its own function space
+\([D_\infty \to D_\infty]\).* -/
+theorem theorem_4_4 (h₀ : IsContinuousLattice D₀.carrier) :
+    @IsContinuousLattice (DInf D₀ j₀) inferInstance ∧
+      Nonempty
+        (@Homeomorph (DInf D₀ j₀) (DInfFn D₀ j₀)
+          (@scottTopologicalSpace (DInf D₀ j₀) inferInstance)
+          (@scottTopologicalSpace (DInfFn D₀ j₀)
+            (@ScottMap.instCompleteLattice (DInf D₀ j₀) (DInf D₀ j₀)
+              inferInstance inferInstance))) := by
+  have hTower : ∀ n, IsContinuousLattice (towerType D₀ n) := by
+    intro n
+    induction n with
+    | zero => exact h₀
+    | succ n ih => exact theorem_3_3_isContinuousLattice ih ih
+  refine ⟨proposition_4_1 (towerType D₀) (towerProj D₀ j₀) hTower, ?_⟩
+  exact ⟨theorem_4_4_homeomorph D₀ j₀⟩
 
 end Thm44d
 

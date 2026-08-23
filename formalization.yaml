@@ -2,20 +2,22 @@
 version: "v0.4"
 
 project:
-  name: "Scott 1972 Continuous Lattices — domain equation"
+  name: "Scott 1972 Continuous Lattices — Theorem 4.4"
   description: >-
     A Lean 4 / mathlib formalization of Dana Scott's 1972 paper *Continuous
     Lattices* (LNM 274), through the Milner correction (pp. 135–136). The
-    Palomar compared result is Theorem 4.4 in existential form: there exists a
-    continuous lattice D that is order-isomorphic to its own Scott function
-    space [D → D] — Scott's domain equation D_∞ ≅ [D_∞ → D_∞], obtained from
-    the function-space tower and inverse limit. The full paper development
+    Palomar compared result is Theorem 4.4 as worded in
+    sources/ScottContinLatt1972.md: the inverse limit D_∞ of the recursively
+    defined sequence ⟨D_n, j_n⟩ of function spaces is not only a continuous
+    lattice, but it is also homeomorphic to its own function space
+    [D_∞ → D_∞]. The full paper development
     (injectivity, Scott topology, way-below, function spaces, inverse limits)
     lives in Scott1972/ContinuousLattice/*. The informal account is arxiv.md
     and sources/ScottContinLatt1972.md in this repository. Lean was written
-    by AI agents under the direction and review of the author. There is no
-    sorry outside the deliberate hole in Challenge.lean, no project-defined
-    axiom, and Mathlib is the only Lake dependency.
+    by AI agents under the direction and review of the author. Dana Scott did
+    not participate in or endorse this formalization. There is no sorry
+    outside the deliberate holes in Challenge.lean, no project-defined axiom,
+    and Mathlib is the only Lake dependency.
   authors:
     - "Lars Warren Ericson"
   license: "Apache-2.0"
@@ -32,71 +34,84 @@ classification:
 status:
   scope: >-
     Complete for the compared claim and the underlying Scott1972 library it
-    uses. Theorem 4.4 is proved as theorem_4_4_orderIso in
-    FunctionSpaceTower.lean; the Palomar headline
-    exists_scott_domain_domain_equation packages it existentially. The broader
-    paper (Theorems 2.12, 3.3, 4.1, etc.) is formalized in the same library
-    but is not part of the Comparator-compared family.
+    uses. Theorem 4.4 is the compared declaration theorem_4_4: for a
+    continuous lattice D₀ and projection j₀, the inverse limit D_∞ of the
+    function-space tower is a continuous lattice homeomorphic to [D_∞ → D_∞].
+    The broader paper (Theorems 2.12, 3.3, 4.1, etc.) is formalized in the
+    same library but is not part of the Comparator-compared family.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
   main_results:
-    - declaration: "Scott1972.ContinuousLattice.exists_scott_domain_domain_equation"
-      file: "Solution.lean"
+    - declaration: "Scott1972.ContinuousLattice.theorem_4_4"
+      file: "Scott1972/ContinuousLattice/FunctionSpaceTower.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       comparator_config: "comparator.json"
-      literature_dependencies:
-        - "Scott 1972 Continuous Lattices (LNM 274), Theorem 4.4"
+      literature_dependencies: []
 
 fidelity:
   divergences: >-
-    Scott's Theorem 4.4 is a homeomorphism D_∞ ≅ [D_∞ → D_∞]. The proof
-    constructs theorem_4_4_orderIso (an OrderIso of bundled Scott maps). The
-    Palomar headline is the underlying Equiv D ≃ ScottMap D D, so Comparator
-    is not sensitive to which LE instance Lean synthesizes from CompleteLattice.
-    The existential statement does not expose tower parameters; the proof uses
-    D₀ = Prop and j₀ from Proposition 3.13.
+    Working source: sources/ScottContinLatt1972.md. Theorem 4.4 there is
+    quoted in Challenge.lean and as theorem_4_4. Lean DInf is the inverse
+    limit of the recursively defined sequence ⟨D_n, j_n⟩ of function spaces
+    (D_{n+1} = [D_n → D_n], j_{n+1} = [j_n → j_n], D_0 and j_0 given as in
+    the paragraph above 4.4). Definition 3.1 takes [X → Y] with the product
+    topology; Theorem 3.3 says that on continuous lattices this agrees with
+    the lattice (induced) topology, which is what scottTopologicalSpace and
+    ScottMap use. The homeomorphism is theorem_4_4_homeomorph (i_∞, j_∞ as
+    in the proof of 4.4). The abstract's extra “and isomorphic” is
+    theorem_4_4_orderIso and is not the numbered theorem.
 
 sources:
   - title: "Continuous Lattices"
     authors: ["Dana S. Scott"]
     type: "article"
-    location: "In: Toposes, Algebraic Geometry and Logic, LNM 274, Springer, 1972, pp. 97–136"
-    id: "https://arxiv.org/abs/2606.30782"
+    location: "In: Toposes, Algebraic Geometry and Logic, edited by F. W. Lawvere, LNM 274, Springer-Verlag, 1972, pp. 97–136. Theorem 4.4."
     relationship: formalizes
+    author_endorsement: not-contacted
+    note: >-
+      Primary source. Dana Scott was not contacted and did not participate
+      in or endorse this formalization. The compared claim is Theorem 4.4.
+      Working OCR text: sources/ScottContinLatt1972.md. Narrative inventory:
+      arxiv.md.
+
+  - title: "A Lean 4 Formalization of Scott's Continuous Lattices (1972)"
+    authors: ["Lars Warren Ericson"]
+    type: "article"
+    id: "https://arxiv.org/abs/2606.30782"
+    relationship: other
     author_endorsement: participated
     note: >-
-      Primary source. The compared claim is Theorem 4.4 (domain equation).
-      OCR working text: sources/ScottContinLatt1972.md. Narrative inventory:
-      arxiv.md.
+      The author's write-up of this formalization, not the 1972 source paper.
 
   - title: "Continuous Lattices (Milner correction)"
     authors: ["Robin Milner"]
     type: "article"
     location: "LNM 274, pp. 135–136 (March 1972 correction)"
-    relationship: formalizes
+    relationship: background
+    author_endorsement: not-contacted
     note: >-
       March 1972 correction to Proposition 2.10; formalized in
-      MilnerCorrection.lean. Background for inverse-limit and retraction
-      arguments used in Theorem 4.4.
+      MilnerCorrection.lean. Used in inverse-limit and retraction arguments
+      underlying Theorem 4.4. Milner was not contacted.
 
 related_formalizations:
   - id: "https://github.com/catskillsresearch/scott_models"
-    relationship: related
+    relationship: other
     note: >-
-      Sibling repository with cross-presentation equivalence theorems for
+      Same-author sibling with cross-presentation equivalence theorems for
       Scott 1972 / 1980 / 1982. That Palomar entry was withdrawn after a
       registration glitch; this repository is an independent submission for
       the 1972 paper alone. See PROVENANCE.md.
 
   - id: "https://github.com/catskillsresearch/scott1980"
-    relationship: related
-    note: "Standalone formalization of Scott PRG-19 (1980); not imported here."
+    relationship: other
+    note: "Same-author formalization of Scott PRG-19 (1980); not imported here."
 
   - id: "https://github.com/catskillsresearch/scott1982"
-    relationship: related
-    note: "Standalone formalization of Scott 1982 information systems; not imported here."
+    relationship: other
+    note: "Same-author formalization of Scott 1982 information systems; not imported here."
 
 automation:
   methods:
@@ -125,6 +140,7 @@ automation:
       role: >-
         The author chose the formalization route, reviewed every definition
         and claim, and takes sole responsibility for the mathematical content.
+        Dana Scott was not consulted.
   notes: >-
     Palomar Challenge / Solution / comparator / formalization.yaml packaging
     was added under the author's direction, following the cardb template.
@@ -135,32 +151,36 @@ review:
     - "Lars Warren Ericson"
   notes: >-
     The author directed and reviewed the development. No external review of
-    the Lean source. Every proof step is checked by the Lean kernel.
+    the Lean source, and no review or endorsement by Dana Scott. Every proof
+    step is checked by the Lean kernel.
 
 known_gaps: []
 
 limitations:
   - >-
-    The Comparator-compared family is the existential domain-equation theorem
-    only, not the full Scott 1972 inventory in arxiv.md.
+    The Comparator-compared family is Theorem 4.4 and the definitions it
+    mentions, not the full Scott 1972 inventory in arxiv.md.
   - >-
     The compared theorem depends on propext, Classical.choice, and Quot.sound.
     Classical.choice enters via Scott-open sets and non-decidable predicates.
   - >-
-    Challenge.lean states the claim with a deliberate sorry; Solution.lean and
-    Scott1972/ContinuousLattice/* supply the proof.
+    Challenge.lean states the claim with deliberate sorries; Solution.lean and
+    Scott1972/ContinuousLattice/* supply the proofs.
 
 alignment:
   namespace: "Scott1972.ContinuousLattice"
   statements:
-    - source: "Scott 1972, Theorem 4.4: D_∞ is homeomorphic to [D_∞ → D_∞]"
-      lean: "exists_scott_domain_domain_equation"
-      module: "Challenge (statement), Solution / FunctionSpaceTower (proof)"
+    - source: >-
+        sources/ScottContinLatt1972.md, Theorem 4.4: The inverse limit D_∞ of
+        the recursively defined sequence ⟨D_n, j_n⟩_{n=0}^∞ of function spaces
+        is not only a continuous lattice, but it is also homeomorphic to its
+        own function space [D_∞ → D_∞].
+      lean: "theorem_4_4"
+      module: "Challenge (statement), FunctionSpaceTower.lean (proof)"
       status: proved
       note: >-
-        Existential packaging of theorem_4_4_orderIso. Challenge states with
-        sorry; Solution discharges via Prop + proposition_3_13 + tower +
-        inverse limit.
+        Challenge quotes that sentence. The library proves it via Proposition
+        4.1 and the maps i_∞, j_∞ written in the proof of 4.4.
 
     - source: "Scott 1972, Definition 2.3: continuous lattice"
       lean: "IsContinuousLattice"
@@ -180,14 +200,42 @@ alignment:
       status: proved
       note: "Compared as a definition."
 
-    - source: "Scott 1972, §3: function space [D → D']"
+    - source: >-
+        sources/ScottContinLatt1972.md, Definition 3.1: [X → Y] is the space of
+        all continuous functions f : X → Y endowed with the product topology
+        (pointwise convergence). Theorem 3.3: on continuous lattices the lattice
+        topology agrees with the product topology.
       lean: "ScottMap"
       module: "Challenge (definition), FunctionSpaces.lean"
       status: proved
       note: "Compared as a definition."
+
+    - source: "Scott 1972, Theorem 3.3: [D → D'] is a complete lattice"
+      lean: "ScottMap.instCompleteLattice"
+      module: "Challenge (hole), FunctionSpaces.lean (proof)"
+      status: proved
+      note: "Compared as a definition; Challenge leaves a sorry instance."
 
     - source: "Scott 1972, §2: induced (Scott) topology on a lattice"
       lean: "scottTopologicalSpace"
       module: "Challenge (definition), Specialization.lean"
       status: proved
       note: "Compared as a definition."
+
+    - source: "Scott 1972, Definition 3.6: retraction / projection"
+      lean: "IsContinuousLatticeProjection"
+      module: "Challenge (definition), FunctionSpaces.lean"
+      status: proved
+      note: "Compared as a definition."
+
+    - source: "Scott 1972, §4: inverse limit of compatible sequences"
+      lean: "InverseLimit"
+      module: "Challenge (definition), InverseLimits.lean"
+      status: proved
+      note: "Compared as a definition."
+
+    - source: "Scott 1972, §4: function-space tower D_{n+1} = [D_n → D_n]"
+      lean: "DInf"
+      module: "Challenge (definition), FunctionSpaceTower.lean"
+      status: proved
+      note: "DInf is the inverse limit of the tower; DInfFn is [D_∞ → D_∞]."

@@ -2,14 +2,27 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "Scott1972.ContinuousLattice.exists_scott_domain_domain_equation"
+    "Scott1972.ContinuousLattice.theorem_4_4"
   ],
   "definition_names": [
     "Scott1972.ContinuousLattice.ScottOpen",
     "Scott1972.ContinuousLattice.WayBelow",
     "Scott1972.ContinuousLattice.IsContinuousLattice",
     "Scott1972.ContinuousLattice.scottTopologicalSpace",
-    "Scott1972.ContinuousLattice.ScottMap"
+    "Scott1972.ContinuousLattice.ScottMap",
+    "Scott1972.ContinuousLattice.ScottMap.instCompleteLattice",
+    "Scott1972.ContinuousLattice.IsContinuousLatticeRetraction",
+    "Scott1972.ContinuousLattice.IsContinuousLatticeProjection",
+    "Scott1972.ContinuousLattice.CLat",
+    "Scott1972.ContinuousLattice.towerCLat",
+    "Scott1972.ContinuousLattice.towerType",
+    "Scott1972.ContinuousLattice.towerCompleteLattice",
+    "Scott1972.ContinuousLattice.towerProj",
+    "Scott1972.ContinuousLattice.Compatible",
+    "Scott1972.ContinuousLattice.InverseLimit",
+    "Scott1972.ContinuousLattice.instCompleteLattice",
+    "Scott1972.ContinuousLattice.DInf",
+    "Scott1972.ContinuousLattice.DInfFn"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
 }
