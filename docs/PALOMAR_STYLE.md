@@ -1,7 +1,9 @@
 # Palomar Challenge/Comparator style
 
 Palomar compares elaborated Lean constants, not merely mathematical
-equivalence or pretty-printed declarations. Run this before every submission:
+equivalence or pretty-printed declaration types. For a definition it compares
+the elaborated value too, including universe names and typeclass-instance paths
+inside the body. Run this before every submission:
 
 ```bash
 scripts/palomar_preflight.sh
@@ -17,6 +19,12 @@ scripts/palomar_preflight.sh
   a definition, not a structure or instance.
 - Keep concrete Challenge and Solution definition bodies structurally
   identical. Do not rely on proof irrelevance to make values compare.
+- Audit every `definition_names` body and every concrete definition reached
+  transitively from a compared theorem or instance. A matching parent body is
+  insufficient when it refers to a named child definition whose value differs.
+- Write order operations with explicit `@LE.le` instance paths when Challenge
+  and Solution import graphs can elaborate `≤` through different parent
+  structures. `ScottMap.le` exposed this exact failure mode.
 
 ## Concrete structures
 
@@ -42,7 +50,8 @@ data while allowing proof terms to differ.
 The preflight must confirm:
 
 1. the full project builds;
-2. compared names, universe parameters, types, and locked bodies match;
+2. compared names, universe parameters, types, all `definition_names` values,
+   and transitively locked bodies match;
 3. locked bodies contain no generated `._proof_N` dependencies;
 4. Solution sources contain no `sorry`;
 5. Solution theorem axioms are permitted by `comparator.json`; and

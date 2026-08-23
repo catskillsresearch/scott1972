@@ -215,7 +215,11 @@ theorem pointwise_sup_preservesDirectedSup (f g : ScottMap D D') :
 noncomputable def bot : ScottMap D D' :=
   const ⊥
 
-def le (f g : ScottMap D D') : Prop :=
+def le {D : Type u} {D' : Type v} [CompleteLattice D] [CompleteLattice D']
+    (f g : ScottMap D D') : Prop :=
+  letI : LE D' :=
+    (ChainCompletePartialOrder.instOfCompleteLattice
+      (α := D')).toPartialOrder.toPreorder.toLE
   ∀ x, f x ≤ g x
 
 noncomputable def sup (f g : ScottMap D D') : ScottMap D D' :=

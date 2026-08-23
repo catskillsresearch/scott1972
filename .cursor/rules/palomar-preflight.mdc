@@ -8,7 +8,10 @@ alwaysApply: false
 
 - Read `docs/PALOMAR_STYLE.md` before changing compared declarations.
 - Pin universe parameter names and make unstable instance paths explicit.
-- Keep definition-locked Challenge/Solution bodies structurally identical.
+- Keep every `definition_names` value and every transitively locked
+  Challenge/Solution definition structurally identical.
+- Audit named child definitions referenced by matching parent bodies; Palomar
+  compares those values independently.
 - Never use inline proofs in locked structure values: generated
   `._proof_N` constants are mechanically compared.
 - Move proof fields to named theorems and list them in `theorem_names`.

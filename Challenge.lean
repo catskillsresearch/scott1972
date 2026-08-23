@@ -60,12 +60,20 @@ variable {D : Type u} {D' : Type v} [CompleteLattice D] [CompleteLattice D']
 /-- **Scott 1972, §2.** `U` is *Scott-open* when it is an upper set and is
 inaccessible by suprema of non-empty directed sets. -/
 def ScottOpen (U : Set D) : Prop :=
+  letI : LE D :=
+    (CompleteLattice.toCompleteSemilatticeInf (α := D)).toPartialOrder.toPreorder.toLE
+  letI : SupSet D :=
+    (CompleteLattice.toCompleteSemilatticeSup (α := D)).toSupSet
   IsUpperSet U ∧
     ∀ ⦃S : Set D⦄, S.Nonempty → DirectedOn (· ≤ ·) S → sSup S ∈ U → (S ∩ U).Nonempty
 
 /-- **Scott 1972, §2.** The *way-below* relation: `x ≪ y` iff `y` lies in the
 interior of the principal up-set `Set.Ici x` for the induced topology. -/
 def WayBelow (x y : D) : Prop :=
+  letI : LE D :=
+    (CompleteLattice.toCompleteSemilatticeInf (α := D)).toPartialOrder.toPreorder.toLE
+  letI : Preorder D :=
+    (CompleteLattice.toCompleteSemilatticeInf (α := D)).toPartialOrder.toPreorder
   ∃ U : Set D, ScottOpen U ∧ y ∈ U ∧ U ⊆ Set.Ici x
 
 @[inherit_doc] scoped infix:50 " ≪ " => WayBelow
@@ -73,6 +81,8 @@ def WayBelow (x y : D) : Prop :=
 /-- **Scott 1972, Definition 2.3.** A complete lattice is a *continuous lattice*
 when every element is the supremum of the elements way below it. -/
 def IsContinuousLattice (D : Type u) [CompleteLattice D] : Prop :=
+  letI : LE D :=
+    (CompleteLattice.toCompleteSemilatticeInf (α := D)).toPartialOrder.toPreorder.toLE
   ∀ y : D, IsLUB {x | x ≪ y} y
 
 /-- Scott's induced topology on a complete lattice. -/
@@ -96,7 +106,11 @@ theorem ext {f g : ScottMap D D'} (h : ∀ x, f x = g x) : f = g :=
   Subtype.ext (funext h)
 
 /-- Pointwise order on Scott-continuous maps. -/
-def le (f g : ScottMap D D') : Prop := ∀ x, f x ≤ g x
+def le (f g : ScottMap D D') : Prop :=
+  letI : LE D' :=
+    (ChainCompletePartialOrder.instOfCompleteLattice
+      (α := D')).toPartialOrder.toPreorder.toLE
+  ∀ x, f x ≤ g x
 
 /-- Reflexivity of the pointwise order. -/
 theorem le_refl' (f : ScottMap D D') : le f f := by

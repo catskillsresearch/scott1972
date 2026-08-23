@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Diff Challenge vs Solution types for every comparator.json name.
 # Palomar Comparator looks up those names in two lean4export environments
-# and compares ConstantVal (name, levelParams, type) with pp.all-level
-# fidelity: instance names in the type are part of the type. A green
-# `lake build` does not imply a match.
+# and compares ConstantVal (name, levelParams, type, and definition value)
+# with pp.all-level fidelity. Instance names in types and values are part of
+# the comparison. A green `lake build` does not imply a match.
 #
 # Gotchas this script is meant to catch:
 # - instance-path mismatch (e.g. ConditionallyCompletePartialOrder.toSupSet
@@ -23,6 +23,14 @@ mapfile -t NAMES < <(python3 - <<'PY'
 import json
 cfg = json.load(open("comparator.json"))
 for n in cfg["theorem_names"] + cfg.get("definition_names", []):
+    print(n)
+PY
+)
+
+mapfile -t DEFINITION_NAMES < <(python3 - <<'PY'
+import json
+cfg = json.load(open("comparator.json"))
+for n in cfg.get("definition_names", []):
     print(n)
 PY
 )
@@ -86,6 +94,7 @@ fi
 # not definition holes: their bodies lock the advertised pointwise lattice,
 # coordinatewise inverse-limit lattice, and recursive projection tower.
 LOCKED_DEFINITIONS=(
+  Scott1972.ContinuousLattice.ScottMap.le
   Scott1972.ContinuousLattice.ScottMap.instPartialOrder
   Scott1972.ContinuousLattice.ScottMap.sSupMaps
   Scott1972.ContinuousLattice.ScottMap.instSupSet
@@ -94,10 +103,20 @@ LOCKED_DEFINITIONS=(
   Scott1972.ContinuousLattice.functionSpaceRetrFun
   Scott1972.ContinuousLattice.functionSpaceProjection
   Scott1972.ContinuousLattice.towerProj
+  Scott1972.ContinuousLattice.inverseLimitLE
+  Scott1972.ContinuousLattice.inverseLimitLT
   Scott1972.ContinuousLattice.inverseLimitPartialOrder
   Scott1972.ContinuousLattice.inverseLimitSInfCoe
   Scott1972.ContinuousLattice.instInfSetInverseLimit
   Scott1972.ContinuousLattice.instCompleteLattice
+)
+
+# Every `definition_names` value is compared by Palomar. `LOCKED_DEFINITIONS`
+# adds concrete definitions reached transitively through theorem types and
+# instances. Deduplicate while preserving order.
+mapfile -t BODY_NAMES < <(
+  printf '%s\n' "${DEFINITION_NAMES[@]}" "${LOCKED_DEFINITIONS[@]}" |
+    awk '!seen[$0]++'
 )
 
 write_definition_dump() {
@@ -109,7 +128,7 @@ write_definition_dump() {
     echo "set_option pp.universes true"
     echo "set_option pp.fullNames true"
     echo "set_option pp.funBinderTypes true"
-    for n in "${LOCKED_DEFINITIONS[@]}"; do
+    for n in "${BODY_NAMES[@]}"; do
       echo "#print ${n}"
     done
   } >"${out}"
@@ -136,8 +155,9 @@ if grep -nE '\._proof_[0-9]+' \
 fi
 
 if diff -u "${tmp}/challenge-definitions.txt" "${tmp}/solution-definitions.txt"; then
-  echo "OK: concrete lattice and projection-tower definition bodies match."
+  echo "OK: compared and transitively locked definition values match."
 else
-  echo "FAIL: a concrete definition body differs — Comparator will reject its transitive use."
+  echo "FAIL: a compared or transitively locked definition value differs."
+  echo "Palomar Comparator will reject the mismatching constant."
   exit 1
 fi
