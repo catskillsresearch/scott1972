@@ -136,7 +136,7 @@ abbrev ScottC (D D' : Type*) [CompleteLattice D] [CompleteLattice D'] :=
   @ContinuousMap D D' scottTopologicalSpace scottTopologicalSpace
 
 /-- Continuous maps between complete lattices with Scott's induced topologies. -/
-def ScottMap (D D' : Type*) [CompleteLattice D] [CompleteLattice D'] : Type _ :=
+def ScottMap (D : Type u) (D' : Type v) [CompleteLattice D] [CompleteLattice D'] : Type _ :=
   { f : D → D' // @Continuous D D' scottTopologicalSpace scottTopologicalSpace f }
 
 namespace ScottMap
@@ -292,7 +292,8 @@ theorem isLUB_sSup (F : Set (ScottMap D D')) : IsLUB F (sSup F) := by
     rintro _ ⟨f, hfF, rfl⟩
     exact (hg hfF) x
 
-noncomputable instance instCompleteLattice : CompleteLattice (ScottMap D D') :=
+noncomputable instance instCompleteLattice {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] : CompleteLattice (ScottMap D D') :=
   completeLatticeOfSup (ScottMap D D') isLUB_sSup
 
 /-- The identity Scott map. -/
@@ -484,7 +485,7 @@ def scottMapPointwiseSubbasis (D D' : Type*) [CompleteLattice D] [CompleteLattic
 /-- The literal Pi topology on all functions `D → D'`, restricted along the underlying-function
 map of `ScottMap`.  No topology instance is installed, so it can be compared safely with the Scott
 lattice topology and with `scottMapPointwiseTopology`. -/
-@[reducible] noncomputable def scottMapInducedPiTopology (D D' : Type*)
+@[reducible] noncomputable def scottMapInducedPiTopology (D : Type u) (D' : Type v)
     [CompleteLattice D] [CompleteLattice D'] : TopologicalSpace (ScottMap D D') :=
   TopologicalSpace.induced (fun f : ScottMap D D' => (f : D → D'))
     (@Pi.topologicalSpace D (fun _ => D') (fun _ => scottTopologicalSpace))
@@ -788,17 +789,21 @@ theorem proposition_3_5 :
 /-! ### Definition 3.6 -/
 
 /-- **Scott 1972, Definition 3.6.** A *retraction* of continuous lattices. -/
-structure IsContinuousLatticeRetraction (D D' : Type*) [CompleteLattice D] [CompleteLattice D']
-    where
+structure IsContinuousLatticeRetraction (D : Type u) (D' : Type v)
+    [CompleteLattice D] [CompleteLattice D'] where
   incl : ScottMap D D'
   retr : ScottMap D' D
   retr_incl : ∀ d, retr (incl d) = d
 
 /-- **Scott 1972, Definition 3.6.** A *projection* of continuous lattices: a retract with
 `i ∘ j ⊑ id`. -/
-structure IsContinuousLatticeProjection (D D' : Type*) [CompleteLattice D] [CompleteLattice D']
+structure IsContinuousLatticeProjection (D : Type u) (D' : Type v)
+    [CompleteLattice D] [CompleteLattice D']
     extends IsContinuousLatticeRetraction D D' where
-  incl_retr_le : ∀ d, incl (retr d) ≤ d
+  incl_retr_le : ∀ d,
+    @LE.le D'
+      (ChainCompletePartialOrder.instOfCompleteLattice (α := D')).toPartialOrder.toPreorder.toLE
+      (incl (retr d)) d
 
 namespace IsContinuousLatticeRetraction
 

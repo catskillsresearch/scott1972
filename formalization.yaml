@@ -239,7 +239,9 @@ alignment:
       lean: "IsContinuousLatticeProjection"
       module: "Challenge (definition), FunctionSpaces.lean"
       status: proved
-      note: "Compared as a definition."
+      note: >-
+        Structure compared via the theorem-type worklist, not as a
+        definition hole (Comparator only accepts defs in definition_names).
 
     - source: "Scott 1972, §4: inverse limit of compatible sequences"
       lean: "InverseLimit"

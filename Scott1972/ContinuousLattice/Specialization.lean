@@ -26,7 +26,7 @@ open Topology Set
 
 universe u
 
-variable {X D : Type*} [TopologicalSpace X] [CompleteLattice D]
+variable {X : Type*} {D : Type u} [TopologicalSpace X] [CompleteLattice D]
 
 /-! ### Specialization order -/
 

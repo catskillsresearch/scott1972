@@ -35,7 +35,9 @@ This is the classical/topological version of the theory, so we reason classicall
 
 namespace Scott1972.ContinuousLattice
 
-variable {D : Type*} [CompleteLattice D]
+universe u
+
+variable {D : Type u} [CompleteLattice D]
 
 /-- **Scott 1972, §2, the induced topology.** `U` is *Scott-open* when it is an upper set and
 is inaccessible by suprema of non-empty directed sets: if a non-empty directed `S` has its
@@ -140,7 +142,7 @@ theorem wayBelow_sSup_iff {x : D} {S : Set D} (hS : S.Nonempty)
 
 /-- **Scott 1972, Definition 2.3.** A complete lattice `D` is a *continuous lattice* when every
 element is the supremum of the elements way below it: `y = ⊔ {x | x ≪ y}`. -/
-def IsContinuousLattice (D : Type*) [CompleteLattice D] : Prop :=
+def IsContinuousLattice (D : Type u) [CompleteLattice D] : Prop :=
   ∀ y : D, IsLUB {x | x ≪ y} y
 
 /-- In a continuous lattice, `y` is the actual supremum of `{x | x ≪ y}`. -/

@@ -6,6 +6,7 @@ Authors: Lars Warren Ericson.
 import Mathlib.Order.CompleteLattice.Basic
 import Mathlib.Order.UpperLower.Basic
 import Mathlib.Order.Directed
+import Mathlib.Order.BourbakiWitt
 import Mathlib.Topology.Order.ScottTopology
 import Mathlib.Topology.Homeomorph.Defs
 
@@ -44,9 +45,9 @@ namespace Scott1972.ContinuousLattice
 
 open Set Topology
 
-universe u
+universe u v
 
-variable {D D' : Type*} [CompleteLattice D] [CompleteLattice D']
+variable {D : Type u} {D' : Type v} [CompleteLattice D] [CompleteLattice D']
 
 /-- **Scott 1972, §2.** `U` is *Scott-open* when it is an upper set and is
 inaccessible by suprema of non-empty directed sets. -/
@@ -63,7 +64,7 @@ def WayBelow (x y : D) : Prop :=
 
 /-- **Scott 1972, Definition 2.3.** A complete lattice is a *continuous lattice*
 when every element is the supremum of the elements way below it. -/
-def IsContinuousLattice (D : Type*) [CompleteLattice D] : Prop :=
+def IsContinuousLattice (D : Type u) [CompleteLattice D] : Prop :=
   ∀ y : D, IsLUB {x | x ≪ y} y
 
 /-- Scott's induced topology on a complete lattice. -/
@@ -74,7 +75,7 @@ def IsContinuousLattice (D : Type*) [CompleteLattice D] : Prop :=
 \(f : X \to Y\). On continuous lattices, Theorem 3.3 identifies the lattice
 topology with the product topology of 3.1; we take continuity for the induced
 (lattice) topology. -/
-def ScottMap (D D' : Type*) [CompleteLattice D] [CompleteLattice D'] : Type _ :=
+def ScottMap (D : Type u) (D' : Type v) [CompleteLattice D] [CompleteLattice D'] : Type _ :=
   { f : D → D' // @Continuous D D' scottTopologicalSpace scottTopologicalSpace f }
 
 namespace ScottMap
@@ -84,7 +85,8 @@ instance : CoeFun (ScottMap D D') (fun _ => D → D') where
 
 /-- **Scott 1972, Theorem 3.3.** `[D → D']` is a complete lattice (pointwise
 suprema). Deliberate Comparator hole; the proof is in `FunctionSpaces.lean`. -/
-noncomputable instance instCompleteLattice : CompleteLattice (ScottMap D D') := by
+noncomputable instance instCompleteLattice {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] : CompleteLattice (ScottMap D D') := by
   sorry
 
 end ScottMap
@@ -92,23 +94,27 @@ end ScottMap
 /-- **Scott 1972, Definition 3.1 (on lattices).** The literal Pi topology on
 all functions `D → D'`, restricted along the underlying-function map of
 `ScottMap`. -/
-@[reducible] noncomputable def scottMapInducedPiTopology (D D' : Type*)
+@[reducible] noncomputable def scottMapInducedPiTopology (D : Type u) (D' : Type v)
     [CompleteLattice D] [CompleteLattice D'] : TopologicalSpace (ScottMap D D') :=
   TopologicalSpace.induced (fun f : ScottMap D D' => (f : D → D'))
     (@Pi.topologicalSpace D (fun _ => D') (fun _ => scottTopologicalSpace))
 
 /-- **Scott 1972, Definition 3.6.** A *retraction* of continuous lattices. -/
-structure IsContinuousLatticeRetraction (D D' : Type*) [CompleteLattice D] [CompleteLattice D']
-    where
+structure IsContinuousLatticeRetraction (D : Type u) (D' : Type v)
+    [CompleteLattice D] [CompleteLattice D'] where
   incl : ScottMap D D'
   retr : ScottMap D' D
   retr_incl : ∀ d, retr (incl d) = d
 
 /-- **Scott 1972, Definition 3.6.** A *projection* of continuous lattices: a retract with
 `i ∘ j ⊑ id`. -/
-structure IsContinuousLatticeProjection (D D' : Type*) [CompleteLattice D] [CompleteLattice D']
+structure IsContinuousLatticeProjection (D : Type u) (D' : Type v)
+    [CompleteLattice D] [CompleteLattice D']
     extends IsContinuousLatticeRetraction D D' where
-  incl_retr_le : ∀ d, incl (retr d) ≤ d
+  incl_retr_le : ∀ d,
+    @LE.le D'
+      (ChainCompletePartialOrder.instOfCompleteLattice (α := D')).toPartialOrder.toPreorder.toLE
+      (incl (retr d)) d
 
 /-- A complete lattice bundled with its instance, used to define the function-space tower by
 recursion on `ℕ`. -/
