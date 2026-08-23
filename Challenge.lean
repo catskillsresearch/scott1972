@@ -98,11 +98,31 @@ theorem ext {f g : ScottMap D D'} (h : ∀ x, f x = g x) : f = g :=
 /-- Pointwise order on Scott-continuous maps. -/
 def le (f g : ScottMap D D') : Prop := ∀ x, f x ≤ g x
 
+/-- Reflexivity of the pointwise order. -/
+theorem le_refl' (f : ScottMap D D') : le f f := by
+  sorry
+
+/-- Transitivity of the pointwise order. -/
+theorem le_trans' (f g h : ScottMap D D') (hfg : le f g) (hgh : le g h) :
+    le f h := by
+  sorry
+
+/-- Antisymmetry of the pointwise order. -/
+theorem le_antisymm' (f g : ScottMap D D') (hfg : le f g) (hgf : le g f) :
+    f = g := by
+  sorry
+
+/-- The chosen strict pointwise order is `≤ ∧ ¬ ≥`. -/
+theorem lt_iff_le_not_ge' (f g : ScottMap D D') :
+    (le f g ∧ ¬ le g f) ↔ le f g ∧ ¬ le g f := by
+  sorry
+
 instance instPartialOrder : PartialOrder (ScottMap D D') where
   le := le
-  le_refl _ _ := le_refl _
-  le_trans _ _ _ hfg hgh x := le_trans (hfg x) (hgh x)
-  le_antisymm _ _ hfg hgf := ScottMap.ext fun x => le_antisymm (hfg x) (hgf x)
+  le_refl := le_refl'
+  le_trans := le_trans'
+  lt_iff_le_not_ge := lt_iff_le_not_ge'
+  le_antisymm := le_antisymm'
 
 /-- The pointwise supremum function is Scott-continuous. This is the proof
 obligation supplied by Theorem 3.3. -/
@@ -263,30 +283,52 @@ of those sequences \(x = \langle x_n \rangle_{n=0}^{\infty}\) with
 \(j_n(x_{n+1}) = x_n\). -/
 abbrev InverseLimit : Type u := {x : ∀ n, D n // Compatible D P x}
 
-/-- The inverse limit carries the coordinatewise order inherited from its
-ambient product. This declaration makes that order explicit instead of
-leaving typeclass search to choose an equivalent route. -/
-instance inverseLimitPartialOrder : PartialOrder (InverseLimit D P) where
-  le x y := ∀ n,
+/-- Coordinatewise order on compatible sequences. Kept reducible so existing
+subtype-order lemmas see the underlying pointwise relation definitionally. -/
+abbrev inverseLimitLE (x y : InverseLimit D P) : Prop :=
+  ∀ n,
     @LE.le (D n)
       (ChainCompletePartialOrder.instOfCompleteLattice
         (α := D n)).toPartialOrder.toPreorder.toLE
       (x.1 n) (y.1 n)
-  lt x y :=
-    (∀ n,
-      @LE.le (D n)
-        (ChainCompletePartialOrder.instOfCompleteLattice
-          (α := D n)).toPartialOrder.toPreorder.toLE
-        (x.1 n) (y.1 n)) ∧
-      ¬ ∀ n,
-        @LE.le (D n)
-          (ChainCompletePartialOrder.instOfCompleteLattice
-            (α := D n)).toPartialOrder.toPreorder.toLE
-          (y.1 n) (x.1 n)
-  le_refl x n := le_refl (x.1 n)
-  le_trans _ _ _ hxy hyz n := le_trans (hxy n) (hyz n)
-  le_antisymm x y hxy hyx :=
-    Subtype.ext (funext fun n => le_antisymm (hxy n) (hyx n))
+
+/-- Strict coordinatewise order induced by `inverseLimitLE`. -/
+abbrev inverseLimitLT (x y : InverseLimit D P) : Prop :=
+  inverseLimitLE D P x y ∧ ¬ inverseLimitLE D P y x
+
+/-- Reflexivity of the coordinatewise inverse-limit order. -/
+theorem inverseLimitLE_refl (x : InverseLimit D P) :
+    inverseLimitLE D P x x := by
+  sorry
+
+/-- Transitivity of the coordinatewise inverse-limit order. -/
+theorem inverseLimitLE_trans (x y z : InverseLimit D P)
+    (hxy : inverseLimitLE D P x y) (hyz : inverseLimitLE D P y z) :
+    inverseLimitLE D P x z := by
+  sorry
+
+/-- Antisymmetry of the coordinatewise inverse-limit order. -/
+theorem inverseLimitLE_antisymm (x y : InverseLimit D P)
+    (hxy : inverseLimitLE D P x y) (hyx : inverseLimitLE D P y x) :
+    x = y := by
+  sorry
+
+/-- The chosen strict inverse-limit order is `≤ ∧ ¬ ≥`. -/
+theorem inverseLimitLT_iff_LE_not_GE (x y : InverseLimit D P) :
+    inverseLimitLT D P x y ↔
+      inverseLimitLE D P x y ∧ ¬ inverseLimitLE D P y x := by
+  sorry
+
+/-- The inverse limit carries the coordinatewise order inherited from its
+ambient product. This declaration makes that order explicit instead of
+leaving typeclass search to choose an equivalent route. -/
+instance inverseLimitPartialOrder : PartialOrder (InverseLimit D P) where
+  le := inverseLimitLE D P
+  lt := inverseLimitLT D P
+  le_refl := inverseLimitLE_refl D P
+  le_trans := inverseLimitLE_trans D P
+  lt_iff_le_not_ge := inverseLimitLT_iff_LE_not_GE D P
+  le_antisymm := inverseLimitLE_antisymm D P
 
 /-- The coordinatewise infimum of a family of compatible sequences, before
 packaging the compatibility proof. -/

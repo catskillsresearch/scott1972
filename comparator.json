@@ -3,6 +3,10 @@
   "solution_module": "Solution",
   "theorem_names": [
     "Scott1972.ContinuousLattice.theorem_4_4",
+    "Scott1972.ContinuousLattice.ScottMap.le_refl'",
+    "Scott1972.ContinuousLattice.ScottMap.le_trans'",
+    "Scott1972.ContinuousLattice.ScottMap.le_antisymm'",
+    "Scott1972.ContinuousLattice.ScottMap.lt_iff_le_not_ge'",
     "Scott1972.ContinuousLattice.ScottMap.sSupMaps_continuous",
     "Scott1972.ContinuousLattice.ScottMap.isLUB_sSup",
     "Scott1972.ContinuousLattice.functionSpaceInclFun_continuous",
@@ -11,6 +15,10 @@
     "Scott1972.ContinuousLattice.functionSpaceRetrFun_outer_continuous",
     "Scott1972.ContinuousLattice.functionSpaceRetrIncl",
     "Scott1972.ContinuousLattice.functionSpaceInclRetrLe",
+    "Scott1972.ContinuousLattice.inverseLimitLE_refl",
+    "Scott1972.ContinuousLattice.inverseLimitLE_trans",
+    "Scott1972.ContinuousLattice.inverseLimitLE_antisymm",
+    "Scott1972.ContinuousLattice.inverseLimitLT_iff_LE_not_GE",
     "Scott1972.ContinuousLattice.compatible_sInf",
     "Scott1972.ContinuousLattice.isGLB_sInf'"
   ],

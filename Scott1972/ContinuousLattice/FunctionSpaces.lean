@@ -271,12 +271,40 @@ since directed *and* arbitrary suprema of Scott maps are computed pointwise — 
 `completeLatticeOfSup` this is a complete lattice. Note infima are *not* pointwise (Scott's
 warning); `completeLatticeOfSup` derives them as `sSup` of lower bounds. -/
 
+/-- Reflexivity of the pointwise order. -/
+theorem le_refl' {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] (f : ScottMap D D') :
+    ScottMap.le f f :=
+  fun _ => le_refl _
+
+/-- Transitivity of the pointwise order. -/
+theorem le_trans' {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] (f g h : ScottMap D D')
+    (hfg : ScottMap.le f g)
+    (hgh : ScottMap.le g h) : ScottMap.le f h :=
+  fun x => le_trans (hfg x) (hgh x)
+
+/-- Antisymmetry of the pointwise order. -/
+theorem le_antisymm' {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] (f g : ScottMap D D')
+    (hfg : ScottMap.le f g)
+    (hgf : ScottMap.le g f) : f = g :=
+  ScottMap.ext fun x => le_antisymm (hfg x) (hgf x)
+
+/-- The chosen strict pointwise order is `≤ ∧ ¬ ≥`. -/
+theorem lt_iff_le_not_ge' {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] (f g : ScottMap D D') :
+    (ScottMap.le f g ∧ ¬ ScottMap.le g f) ↔
+      ScottMap.le f g ∧ ¬ ScottMap.le g f :=
+  Iff.rfl
+
 instance instPartialOrder {D : Type u} {D' : Type v}
     [CompleteLattice D] [CompleteLattice D'] : PartialOrder (ScottMap D D') where
   le := ScottMap.le
-  le_refl _ _ := le_refl _
-  le_trans _ _ _ hfg hgh x := le_trans (hfg x) (hgh x)
-  le_antisymm _ _ hfg hgf := ScottMap.ext fun x => le_antisymm (hfg x) (hgf x)
+  le_refl := le_refl'
+  le_trans := le_trans'
+  lt_iff_le_not_ge := lt_iff_le_not_ge'
+  le_antisymm := le_antisymm'
 
 theorem le_def {f g : ScottMap D D'} : f ≤ g ↔ ∀ x, (f : D → D') x ≤ g x := Iff.rfl
 

@@ -57,30 +57,52 @@ def Compatible (x : ∀ n, D n) : Prop := ∀ n, (P n).retr (x (n + 1)) = x n
 /-- **Scott 1972, §4.** The inverse limit `D_∞` as the subspace of compatible sequences. -/
 abbrev InverseLimit : Type u := {x : ∀ n, D n // Compatible D P x}
 
-/-- The inverse limit carries the coordinatewise order inherited from its
-ambient product. This declaration makes that order explicit instead of
-leaving typeclass search to choose an equivalent route. -/
-instance inverseLimitPartialOrder : PartialOrder (InverseLimit D P) where
-  le x y := ∀ n,
+/-- Coordinatewise order on compatible sequences. Kept reducible so existing
+subtype-order lemmas see the underlying pointwise relation definitionally. -/
+abbrev inverseLimitLE (x y : InverseLimit D P) : Prop :=
+  ∀ n,
     @LE.le (D n)
       (ChainCompletePartialOrder.instOfCompleteLattice
         (α := D n)).toPartialOrder.toPreorder.toLE
       (x.1 n) (y.1 n)
-  lt x y :=
-    (∀ n,
-      @LE.le (D n)
-        (ChainCompletePartialOrder.instOfCompleteLattice
-          (α := D n)).toPartialOrder.toPreorder.toLE
-        (x.1 n) (y.1 n)) ∧
-      ¬ ∀ n,
-        @LE.le (D n)
-          (ChainCompletePartialOrder.instOfCompleteLattice
-            (α := D n)).toPartialOrder.toPreorder.toLE
-          (y.1 n) (x.1 n)
-  le_refl x n := le_refl (x.1 n)
-  le_trans _ _ _ hxy hyz n := le_trans (hxy n) (hyz n)
-  le_antisymm x y hxy hyx :=
-    Subtype.ext (funext fun n => le_antisymm (hxy n) (hyx n))
+
+/-- Strict coordinatewise order induced by `inverseLimitLE`. -/
+abbrev inverseLimitLT (x y : InverseLimit D P) : Prop :=
+  inverseLimitLE D P x y ∧ ¬ inverseLimitLE D P y x
+
+/-- Reflexivity of the coordinatewise inverse-limit order. -/
+theorem inverseLimitLE_refl (x : InverseLimit D P) :
+    inverseLimitLE D P x x :=
+  fun n => le_refl (x.1 n)
+
+/-- Transitivity of the coordinatewise inverse-limit order. -/
+theorem inverseLimitLE_trans (x y z : InverseLimit D P)
+    (hxy : inverseLimitLE D P x y) (hyz : inverseLimitLE D P y z) :
+    inverseLimitLE D P x z :=
+  fun n => le_trans (hxy n) (hyz n)
+
+/-- Antisymmetry of the coordinatewise inverse-limit order. -/
+theorem inverseLimitLE_antisymm (x y : InverseLimit D P)
+    (hxy : inverseLimitLE D P x y) (hyx : inverseLimitLE D P y x) :
+    x = y :=
+  Subtype.ext (funext fun n => le_antisymm (hxy n) (hyx n))
+
+/-- The chosen strict inverse-limit order is `≤ ∧ ¬ ≥`. -/
+theorem inverseLimitLT_iff_LE_not_GE (x y : InverseLimit D P) :
+    inverseLimitLT D P x y ↔
+      inverseLimitLE D P x y ∧ ¬ inverseLimitLE D P y x :=
+  Iff.rfl
+
+/-- The inverse limit carries the coordinatewise order inherited from its
+ambient product. This declaration makes that order explicit instead of
+leaving typeclass search to choose an equivalent route. -/
+instance inverseLimitPartialOrder : PartialOrder (InverseLimit D P) where
+  le := inverseLimitLE D P
+  lt := inverseLimitLT D P
+  le_refl := inverseLimitLE_refl D P
+  le_trans := inverseLimitLE_trans D P
+  lt_iff_le_not_ge := inverseLimitLT_iff_LE_not_GE D P
+  le_antisymm := inverseLimitLE_antisymm D P
 
 /-- **Scott 1972, §4 (topological inverse limit).** The explicit subspace topology on compatible
 sequences, induced by `Subtype.val` from the Mathlib Pi topology of the stage Scott topologies.
