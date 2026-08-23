@@ -11,6 +11,7 @@
     "Scott1972.ContinuousLattice.scottTopologicalSpace",
     "Scott1972.ContinuousLattice.ScottMap",
     "Scott1972.ContinuousLattice.ScottMap.instCompleteLattice",
+    "Scott1972.ContinuousLattice.scottMapInducedPiTopology",
     "Scott1972.ContinuousLattice.IsContinuousLatticeRetraction",
     "Scott1972.ContinuousLattice.IsContinuousLatticeProjection",
     "Scott1972.ContinuousLattice.CLat",
@@ -21,6 +22,7 @@
     "Scott1972.ContinuousLattice.Compatible",
     "Scott1972.ContinuousLattice.InverseLimit",
     "Scott1972.ContinuousLattice.instCompleteLattice",
+    "Scott1972.ContinuousLattice.inverseLimitTopology",
     "Scott1972.ContinuousLattice.DInf",
     "Scott1972.ContinuousLattice.DInfFn"
   ],

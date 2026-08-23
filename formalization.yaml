@@ -10,7 +10,9 @@ project:
     sources/ScottContinLatt1972.md: the inverse limit D_∞ of the recursively
     defined sequence ⟨D_n, j_n⟩ of function spaces is not only a continuous
     lattice, but it is also homeomorphic to its own function space
-    [D_∞ → D_∞]. The full paper development
+    [D_∞ → D_∞]. The compared Homeomorph explicitly uses the product/subspace
+    topology on the inverse limit and the pointwise Pi topology on the function
+    space. The full paper development
     (injectivity, Scott topology, way-below, function spaces, inverse limits)
     lives in Scott1972/ContinuousLattice/*. The informal account is arxiv.md
     and sources/ScottContinLatt1972.md in this repository. Lean was written
@@ -37,6 +39,8 @@ status:
     uses. Theorem 4.4 is the compared declaration theorem_4_4: for a
     continuous lattice D₀ and projection j₀, the inverse limit D_∞ of the
     function-space tower is a continuous lattice homeomorphic to [D_∞ → D_∞].
+    The Homeomorph names Scott's product/subspace inverse-limit topology and
+    Definition 3.1 pointwise function-space topology explicitly.
     The broader paper (Theorems 2.12, 3.3, 4.1, etc.) is formalized in the
     same library but is not part of the Comparator-compared family.
   sorry_count: 0
@@ -57,10 +61,18 @@ fidelity:
     limit of the recursively defined sequence ⟨D_n, j_n⟩ of function spaces
     (D_{n+1} = [D_n → D_n], j_{n+1} = [j_n → j_n], D_0 and j_0 given as in
     the paragraph above 4.4). Definition 3.1 takes [X → Y] with the product
-    topology; Theorem 3.3 says that on continuous lattices this agrees with
-    the lattice (induced) topology, which is what scottTopologicalSpace and
-    ScottMap use. The homeomorphism is theorem_4_4_homeomorph (i_∞, j_∞ as
-    in the proof of 4.4). The abstract's extra “and isomorphic” is
+    topology, represented by scottMapInducedPiTopology. The inverse limit uses
+    inverseLimitTopology, the subspace topology induced from the Pi product of
+    the stage Scott topologies. Proposition 4.1 follows Scott's route:
+    coordinatewise maximal extensions from Proposition 3.8 are made compatible
+    by Lemma 3.9, yielding injectivity, and Theorem 2.12 supplies both the
+    continuous-lattice result and the topology identification. Lemma 4.5 follows
+    Scott's induction after moving a projection through a directed supremum.
+    The source-topology homeomorphism uses Scott's formulas
+    i_∞(x) = ⨆ₙ (i_{n∞} ∘ x_{n+1} ∘ j_{∞n}) and
+    j_∞(f) = ⨆ₙ i_{(n+1)∞}(j_{∞n} ∘ f ∘ i_{n∞}).
+    Theorem 3.3 identifies the pointwise function topology with the lattice
+    Scott topology. The abstract's extra “and isomorphic” is
     theorem_4_4_orderIso and is not the numbered theorem.
 
 sources:
@@ -180,7 +192,8 @@ alignment:
       status: proved
       note: >-
         Challenge quotes that sentence. The library proves it via Proposition
-        4.1 and the maps i_∞, j_∞ written in the proof of 4.4.
+        4.1 and the maps i_∞, j_∞ written in the proof of 4.4. Its explicit
+        Homeomorph uses inverseLimitTopology and scottMapInducedPiTopology.
 
     - source: "Scott 1972, Definition 2.3: continuous lattice"
       lean: "IsContinuousLattice"
@@ -231,6 +244,20 @@ alignment:
     - source: "Scott 1972, §4: inverse limit of compatible sequences"
       lean: "InverseLimit"
       module: "Challenge (definition), InverseLimits.lean"
+      status: proved
+      note: "Compared as a definition."
+
+    - source: >-
+        Scott 1972, §4: inverse limit as a subspace of the product of the D_n
+      lean: "inverseLimitTopology"
+      module: "Challenge (definition), InverseLimits.lean"
+      status: proved
+      note: "Compared as a definition."
+
+    - source: >-
+        Scott 1972, Definition 3.1: pointwise product topology on [D → D']
+      lean: "scottMapInducedPiTopology"
+      module: "Challenge (definition), FunctionSpaces.lean"
       status: proved
       note: "Compared as a definition."
 

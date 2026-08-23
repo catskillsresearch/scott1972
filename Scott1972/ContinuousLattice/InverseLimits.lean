@@ -5,8 +5,7 @@ Authors: Lars Warren Ericson.
 Github:  https://github.com/catskillsresearch/scott1972
 -/
 
-import Scott1972.ContinuousLattice.Constructions
-import Scott1972.ContinuousLattice.FunctionSpaces
+import Scott1972.ContinuousLattice.Theorem212
 import Mathlib.Order.GaloisConnection.Basic
 
 /-!
@@ -17,20 +16,15 @@ lattices `⟨Dₙ, jₙ⟩` with each `jₙ : D_{n+1} → Dₙ` a projection is 
 
 Scott proves this through injectivity (`D_∞` is an injective `T₀`-space, hence — Theorem 2.12 — a
 continuous lattice), using the maximal-extension Proposition 3.8 and the compatibility Lemma 3.9.
-The *retraction* of `∏ Dₙ` onto `D_∞` that Scott's argument constructs (extend the identity of
-`D_∞` along its inclusion) is realized here **order-theoretically and without topology**:
 
 * each projection `jₙ = (P n).retr` is the upper adjoint of its embedding `iₙ = (P n).incl`
   (`projection_galoisConnection`), hence preserves arbitrary infima;
 * therefore the compatibility predicate is closed under pointwise `sInf`, making `D_∞` a complete
-  lattice (`completeLatticeOfInf`);
-* the inclusion `D_∞ ↪ ∏ Dₙ` preserves infima, so it has a **left adjoint** `r : ∏ Dₙ → D_∞`
-  (`invLimRetr`); a left adjoint preserves all suprema, in particular directed ones, so `r` is
-  Scott-continuous, and `r ∘ incl = id`.
+  lattice (`completeLatticeOfInf`).
 
-Thus `D_∞` is a (Scott-continuous) retract of the continuous lattice `∏ Dₙ` (Prop 2.9a), so by
-Prop 2.10a it is a continuous lattice. This is exactly the retraction Scott builds via injectivity,
-obtained here as the adjoint of the inclusion.
+For Proposition 4.1 itself we follow Scott's proof: extend every coordinate of a map into `D_∞`
+maximally by Proposition 3.8, use Lemma 3.9 to make those extensions compatible, assemble the
+resulting map into the inverse limit, and invoke Theorem 2.12.
 -/
 
 namespace Scott1972.ContinuousLattice
@@ -62,6 +56,25 @@ def Compatible (x : ∀ n, D n) : Prop := ∀ n, (P n).retr (x (n + 1)) = x n
 
 /-- **Scott 1972, §4.** The inverse limit `D_∞` as the subspace of compatible sequences. -/
 abbrev InverseLimit : Type u := {x : ∀ n, D n // Compatible D P x}
+
+/-- **Scott 1972, §4 (topological inverse limit).** The explicit subspace topology on compatible
+sequences, induced by `Subtype.val` from the Mathlib Pi topology of the stage Scott topologies.
+This is a named topology, not an instance, so it introduces no topology-instance diamond. -/
+@[reducible] noncomputable def inverseLimitTopology : TopologicalSpace (InverseLimit D P) :=
+  TopologicalSpace.induced (Subtype.val : InverseLimit D P → ∀ n, D n)
+    (@Pi.topologicalSpace ℕ D (fun _ => scottTopologicalSpace))
+
+/-- Every coordinate projection from the explicit product/subspace inverse-limit topology is
+continuous. -/
+theorem inverseLimit_coordinate_continuous (n : ℕ) :
+    @Continuous (InverseLimit D P) (D n) (inverseLimitTopology D P)
+      scottTopologicalSpace (fun x => x.1 n) := by
+  letI : ∀ n, TopologicalSpace (D n) := fun _ => scottTopologicalSpace
+  rw [continuous_def]
+  intro U hU
+  rw [isOpen_induced_iff]
+  exact ⟨{x : ∀ n, D n | x n ∈ U},
+    (@continuous_apply ℕ D (fun _ => scottTopologicalSpace) n).isOpen_preimage U hU, rfl⟩
 
 /-- `jₙ` preserves arbitrary infima (it is the upper adjoint of `iₙ`). -/
 theorem retr_sInf (n : ℕ) (A : Set (D (n + 1))) :
@@ -131,60 +144,94 @@ theorem coe_sSup_of_directed (S : Set (InverseLimit D P)) (hSne : S.Nonempty)
       exact Subtype.coe_le_coe.mpr (hb hx)
   rw [(isLUB_sSup S).unique hlub]
 
-/-- The inclusion `D_∞ ↪ ∏ Dₙ` preserves directed suprema. -/
-theorem incl_preservesDirectedSup :
-    PreservesDirectedSup (Subtype.val : InverseLimit D P → ∀ n, D n) := by
-  intro S hSne hSdir
-  exact coe_sSup_of_directed D P S hSne hSdir
+/-- The explicit inverse-limit topology is `T₀`, since the inclusion into the product of the
+stage Scott spaces is an embedding. -/
+theorem inverseLimit_t0Space :
+    @T0Space (InverseLimit D P) (inverseLimitTopology D P) := by
+  letI : ∀ n, TopologicalSpace (D n) := fun _ => scottTopologicalSpace
+  letI : ∀ n, T0Space (D n) := fun _ => scottTopology_t0Space
+  letI : TopologicalSpace (InverseLimit D P) := inverseLimitTopology D P
+  have hval : Topology.IsEmbedding (Subtype.val : InverseLimit D P → ∀ n, D n) :=
+    ⟨⟨rfl⟩, Subtype.val_injective⟩
+  exact hval.t0Space
 
-/-- Scott's retraction `r : ∏ Dₙ → D_∞`, realized as the **left adjoint** of the inclusion:
-`r y = ⊓ { x ∈ D_∞ : y ⊑ x }`, the least compatible sequence above `y`. -/
-noncomputable def invLimRetr (y : ∀ n, D n) : InverseLimit D P :=
-  sInf {x : InverseLimit D P | y ≤ x.1}
-
-theorem le_coe_invLimRetr (y : ∀ n, D n) : y ≤ (invLimRetr D P y).1 := by
-  rw [invLimRetr, coe_sInf]
-  refine le_sInf ?_
-  rintro _ ⟨x, hx, rfl⟩
-  exact hx
-
-/-- `r ⊣ incl`: the retraction is left adjoint to the inclusion. -/
-theorem invLimRetr_galoisConnection :
-    GaloisConnection (invLimRetr D P) (Subtype.val : InverseLimit D P → ∀ n, D n) := by
-  intro y x
+/-- The specialization order of the explicit inverse-limit topology is the componentwise order. -/
+theorem inverseLimit_specializationLe_iff (x y : InverseLimit D P) :
+    @SpecializationLe (InverseLimit D P) (inverseLimitTopology D P) x y ↔ x ≤ y := by
+  let stageOrder : ∀ n, Preorder (D n) := fun _ => inferInstance
+  let limitOrder : Preorder (InverseLimit D P) := inferInstance
+  letI : ∀ n, TopologicalSpace (D n) := fun _ => scottTopologicalSpace
+  letI : TopologicalSpace (InverseLimit D P) := inverseLimitTopology D P
+  letI : ∀ n, Preorder (D n) := stageOrder
+  letI : Preorder (InverseLimit D P) := limitOrder
+  have hval : Topology.IsEmbedding (Subtype.val : InverseLimit D P → ∀ n, D n) :=
+    ⟨⟨rfl⟩, Subtype.val_injective⟩
+  rw [specializationLe_iff_specializes, ← hval.isInducing.specializes_iff, specializes_pi]
   constructor
-  · intro h
-    exact le_trans (le_coe_invLimRetr D P y) (Subtype.coe_le_coe.mpr h)
-  · intro h
-    exact sInf_le (show x ∈ {x' : InverseLimit D P | y ≤ x'.1} from h)
+  · intro h n
+    rw [← specializationLe_scott_iff, specializationLe_iff_specializes]
+    exact h n
+  · intro h n
+    rw [← specializationLe_iff_specializes, specializationLe_scott_iff]
+    exact h n
 
-/-- The retraction preserves directed suprema (a left adjoint preserves all suprema). -/
-theorem invLimRetr_preservesDirectedSup :
-    PreservesDirectedSup (invLimRetr D P) := by
-  intro S _ _
-  rw [(invLimRetr_galoisConnection D P).l_sSup, sSup_image]
+/-- **Scott 1972, Proposition 4.1 (injectivity step).** Coordinatewise maximal extensions
+assemble to an extension into the inverse limit. Lemma 3.9 is exactly what supplies compatibility
+of adjacent coordinates. -/
+theorem inverseLimit_isInjectiveSpace (hD : ∀ n, IsContinuousLattice (D n)) :
+    @IsInjectiveSpace.{u, u} (InverseLimit D P) (inverseLimitTopology D P) := by
+  intro X Y _ _ e he f
+  let stageOrder : ∀ n, Preorder (D n) := fun _ => inferInstance
+  let limitOrder : Preorder (InverseLimit D P) := inferInstance
+  letI : ∀ n, TopologicalSpace (D n) := fun _ => scottTopologicalSpace
+  letI : TopologicalSpace (InverseLimit D P) := inverseLimitTopology D P
+  letI : ∀ n, Preorder (D n) := stageOrder
+  letI : Preorder (InverseLimit D P) := limitOrder
+  let fcoord (n : ℕ) (x : X) : D n := (f x).1 n
+  have hfcoord (n : ℕ) : @Continuous X (D n) _ scottTopologicalSpace (fcoord n) :=
+    (inverseLimit_coordinate_continuous D P n).comp f.continuous
+  let fbar (n : ℕ) : Y → D n := scottExtend e (fcoord n)
+  have hfbar_cont (n : ℕ) :
+      @Continuous Y (D n) _ scottTopologicalSpace (fbar n) :=
+    scottExtend_continuous (hD n) e (fcoord n)
+  have hfbar_compat (y : Y) (n : ℕ) :
+      (P n).retr (fbar (n + 1) y) = fbar n y := by
+    symm
+    exact lemma_3_9 (hD n) (hD (n + 1)) (P n) e he
+      (hfcoord n) (hfcoord (n + 1)) (fun x => (f x).2 n |>.symm) y
+  let fbarInf (y : Y) : InverseLimit D P :=
+    ⟨fun n => fbar n y, hfbar_compat y⟩
+  have hfbarInf_cont :
+      @Continuous Y (InverseLimit D P) _ (inverseLimitTopology D P) fbarInf := by
+    change @Continuous Y (InverseLimit D P) _
+      (TopologicalSpace.induced (Subtype.val : InverseLimit D P → ∀ n, D n)
+        (@Pi.topologicalSpace ℕ D (fun _ => scottTopologicalSpace))) fbarInf
+    rw [continuous_induced_rng]
+    exact continuous_pi hfbar_cont
+  refine ⟨⟨fbarInf, hfbarInf_cont⟩, fun x => ?_⟩
+  apply Subtype.ext
+  funext n
+  exact scottExtend_eq_of_continuous (hD n) e he (fcoord n) (hfcoord n) x
 
-/-- `r ∘ incl = id`: the retraction fixes `D_∞`. -/
-theorem invLimRetr_incl (x : InverseLimit D P) : invLimRetr D P x.1 = x := by
-  refine le_antisymm ?_ ?_
-  · exact sInf_le (show x ∈ {x' : InverseLimit D P | (x.1 : ∀ n, D n) ≤ x'.1} from le_refl x.1)
-  · refine le_sInf ?_
-    intro x' hx'
-    exact Subtype.coe_le_coe.mp hx'
-
-/-- `D_∞` is a Scott-continuous retract of the product `∏ Dₙ`. -/
-noncomputable def inverseLimitRetraction :
-    IsContinuousLatticeRetraction (InverseLimit D P) (∀ n, D n) where
-  incl := ⟨Subtype.val, continuous_of_preservesDirectedSup (incl_preservesDirectedSup D P)⟩
-  retr := ⟨invLimRetr D P, continuous_of_preservesDirectedSup (invLimRetr_preservesDirectedSup D P)⟩
-  retr_incl := invLimRetr_incl D P
-
-/-- **Scott 1972, Proposition 4.1.** The inverse limit `D_∞` of an ω-system of continuous lattices
-with projection bonding maps is itself a continuous lattice. The product `∏ Dₙ` is a continuous
-lattice (Prop 2.9a) and `D_∞` is a retract of it (`inverseLimitRetraction`), so Prop 2.10a applies. -/
+/-- **Scott 1972, Proposition 4.1.** The inverse limit is injective by the coordinatewise
+Proposition 3.8/Lemma 3.9 construction; Theorem 2.12 then gives the continuous-lattice structure
+on the existing componentwise complete lattice. -/
 theorem proposition_4_1 (hD : ∀ n, IsContinuousLattice (D n)) :
-    IsContinuousLattice (InverseLimit D P) :=
-  proposition_2_10_a (inverseLimitRetraction D P) (proposition_2_9_a D hD)
+    IsContinuousLattice (InverseLimit D P) := by
+  letI : TopologicalSpace (InverseLimit D P) := inverseLimitTopology D P
+  letI : T0Space (InverseLimit D P) := inverseLimit_t0Space D P
+  exact (theorem_2_12_backward_exact (inverseLimit_isInjectiveSpace D P hD)
+    (inverseLimit_specializationLe_iff D P)).1
+
+/-- The Scott lattice topology constructed on `D∞` agrees with Scott's literal inverse-limit
+topology: the subspace topology inherited from the Pi product of the stage Scott topologies. -/
+theorem inverseLimit_scottTopology_eq_induced_pi (hD : ∀ n, IsContinuousLattice (D n)) :
+    (scottTopologicalSpace : TopologicalSpace (InverseLimit D P)) =
+      inverseLimitTopology D P := by
+  letI : TopologicalSpace (InverseLimit D P) := inverseLimitTopology D P
+  letI : T0Space (InverseLimit D P) := inverseLimit_t0Space D P
+  exact (theorem_2_12_backward_exact (inverseLimit_isInjectiveSpace D P hD)
+    (inverseLimit_specializationLe_iff D P)).2
 
 /-! ### Proposition 4.2: the maps `j_{∞n}` are projections
 
@@ -403,6 +450,21 @@ noncomputable def embInf (n : ℕ) : ScottMap (D n) (InverseLimit D P) :=
 noncomputable def projInf (n : ℕ) : ScottMap (InverseLimit D P) (D n) :=
   ⟨projInfFun D P n, continuous_of_preservesDirectedSup (eval_preservesDirectedSup D P n)⟩
 
+/-- Proposition 4.2's embedding `i_{n∞}` is also continuous for Scott's literal inverse-limit
+topology, namely the subspace topology inherited from the product `∏ₘ Dₘ`. -/
+theorem embInf_inverseLimitTopology_continuous (hD : ∀ n, IsContinuousLattice (D n)) (n : ℕ) :
+    @Continuous (D n) (InverseLimit D P) scottTopologicalSpace
+      (inverseLimitTopology D P) (embInf D P n) := by
+  rw [← inverseLimit_scottTopology_eq_induced_pi D P hD]
+  exact (embInf D P n).continuous
+
+/-- Proposition 4.2's projection `j_{∞n}` is a continuous coordinate map for the explicit
+product/subspace inverse-limit topology. -/
+theorem projInf_inverseLimitTopology_continuous (n : ℕ) :
+    @Continuous (InverseLimit D P) (D n) (inverseLimitTopology D P)
+      scottTopologicalSpace (projInf D P n) :=
+  inverseLimit_coordinate_continuous D P n
+
 /-- **Scott 1972, Proposition 4.2.** Each `j_{∞n} : D_∞ → Dₙ` is a projection of continuous
 lattices, with embedding `i_{n∞} = embInf n`. -/
 noncomputable def proposition_4_2 (n : ℕ) :
@@ -485,27 +547,67 @@ theorem idInf_eq_iSup :
 sequence `u : ∀ n, D_{n+1}` satisfies the (shifted) recursion `j_{n+1}(u_{n+2}) = u_{n+1}`, then the
 monotone limit `u_∞ = ⨆ₙ i_{(n+1)∞}(uₙ)` has `j_{∞(n+1)}(u_∞) = uₙ`.
 
-Proof: extend `u` to a *compatible* sequence `w` (`w₀ = j₀(u₀)`, `w_{k+1} = u_k`); then `w` is a
-point of `D_∞`, and since the family `k ↦ i_{k∞}(w_k)` is monotone, dropping its `0`-th term does
-not change the lub (`Monotone.iSup_nat_add`), so `u_∞ = ⨆ₖ i_{k∞}(w_k) = w` by `inverseLimit_eq_iSup`.
-Hence `j_{∞(n+1)}(u_∞) = w_{n+1} = uₙ`. -/
+The proof follows Scott's argument at source lines 1316–1320.  First the defining family is
+monotone.  Continuity of `j_{∞(n+1)}` therefore moves the projection through its directed
+supremum.  Finally, for every `m ≥ n`, the identity
+`j_{∞(n+1)}(i_{(m+1)∞}(u_m)) = u_n` is proved by induction on `m - n`, peeling one projection with
+`projLE_succ` and then applying the recursion hypothesis `j_{m+1}(u_{m+1}) = u_m`. -/
 theorem lemma_4_5 (u : ∀ n, D (n + 1))
     (hu : ∀ n, (P (n + 1)).retr (u (n + 1)) = u n) (n : ℕ) :
     (⨆ k, embInf D P (k + 1) (u k) : InverseLimit D P).1 (n + 1) = u n := by
-  have hw : Compatible D P (fun k => Nat.casesOn k ((P 0).retr (u 0)) (fun m => u m)) := by
-    intro k
-    cases k with
-    | zero => rfl
-    | succ m => exact hu m
-  set wlim : InverseLimit D P :=
-    ⟨fun k => Nat.casesOn k ((P 0).retr (u 0)) (fun m => u m), hw⟩ with hwlim
-  have hGmono : Monotone (fun k => embInf D P k (wlim.1 k)) :=
-    monotone_nat_of_le_succ (embInf_le_succ D P wlim)
-  have hsup : (⨆ k, embInf D P (k + 1) (u k) : InverseLimit D P) = wlim := by
-    have h1 : (⨆ k, embInf D P (k + 1) (u k) : InverseLimit D P)
-        = ⨆ k, embInf D P (k + 1) (wlim.1 (k + 1)) := rfl
-    rw [h1, Monotone.iSup_nat_add hGmono 1, ← inverseLimit_eq_iSup D P wlim]
-  rw [hsup]
+  let a : ℕ → InverseLimit D P := fun k => embInf D P (k + 1) (u k)
+  have ha_succ (k : ℕ) : a k ≤ a (k + 1) := by
+    rw [show a k = embInf D P (k + 1) (u k) from rfl,
+      show a (k + 1) = embInf D P (k + 2) (u (k + 1)) from rfl,
+      ← embInf_succ D P (k + 1) (u k)]
+    exact embInf_monotone D P (k + 2)
+      (by calc (P (k + 1)).incl (u k)
+            = (P (k + 1)).incl ((P (k + 1)).retr (u (k + 1))) := by rw [hu k]
+          _ ≤ u (k + 1) := (P (k + 1)).incl_retr_le _)
+  have ha : Monotone a := monotone_nat_of_le_succ ha_succ
+  have hprojLE : ∀ d n : ℕ,
+      projLE D P (show n + 1 ≤ n + d + 1 by omega) (u (n + d)) = u n := by
+    intro d
+    induction d with
+    | zero =>
+        intro n
+        simpa only [Nat.add_zero] using
+          (projLE_self D P (le_refl (n + 1)) (u n))
+    | succ d ih =>
+        intro n
+        simp only [Nat.add_succ]
+        rw [projLE_succ D P
+          (show n + 1 ≤ n + d + 1 by omega)
+          (show n + 1 ≤ (n + d + 1) + 1 by omega)]
+        rw [hu (n + d)]
+        exact ih n
+  have hprojection : ∀ d n : ℕ,
+      (embInf D P (n + d + 1) (u (n + d))).1 (n + 1) = u n := by
+    intro d n
+    cases d with
+    | zero =>
+        change iComp D P (n + 1) (u n) (n + 1) = u n
+        exact iComp_self D P (n + 1) (u n)
+    | succ d =>
+        change iComp D P (n + (d + 1) + 1) (u (n + (d + 1))) (n + 1) = u n
+        rw [iComp_of_ge D P (by omega)]
+        exact hprojLE (d + 1) n
+  have hdir : DirectedOn (· ≤ ·) (Set.range a) :=
+    directedOn_range.2 ha.directed_le
+  have hcont := (projInf D P (n + 1)).preservesDirectedSup_coe
+    (Set.range a) (Set.range_nonempty a) hdir
+  rw [show (⨆ k, embInf D P (k + 1) (u k) : InverseLimit D P)
+      = sSup (Set.range a) from sSup_range.symm]
+  change (projInf D P (n + 1)) (sSup (Set.range a)) = u n
+  rw [hcont, ← Set.range_comp, sSup_range]
+  apply le_antisymm
+  · exact iSup_le fun m => by
+      by_cases hmn : n ≤ m
+      · obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hmn
+        exact le_of_eq (hprojection d n)
+      · exact le_trans ((ha (Nat.le_of_not_ge hmn)) (n + 1))
+          (le_of_eq (hprojection 0 n))
+  · exact le_trans (le_of_eq (hprojection 0 n).symm) (le_iSup (fun m => (a m).1 (n + 1)) n)
 
 /-! ### Corollary 4.3: `D_∞` is also the *direct* limit
 
@@ -576,6 +678,15 @@ theorem coconeInf_preservesDirectedSup (f : ∀ n, ScottMap (D n) D') :
   show (⨆ n, f n ((sSup S).1 n)) = sSup (coconeInf D P f '' S)
   simp_rw [key, sSup_image', coconeInf_apply]
   rw [iSup_comm]
+
+/-- Corollary 4.3's formula `f∞(x) = ⨆ₙ fₙ(xₙ)` is continuous not only for the reconstructed Scott
+topology on `D∞`, but explicitly for Scott's product/subspace inverse-limit topology. -/
+theorem coconeInf_inverseLimitTopology_continuous (hD : ∀ n, IsContinuousLattice (D n))
+    (f : ∀ n, ScottMap (D n) D') :
+    @Continuous (InverseLimit D P) D' (inverseLimitTopology D P)
+      scottTopologicalSpace (coconeInf D P f) := by
+  rw [← inverseLimit_scottTopology_eq_induced_pi D P hD]
+  exact continuous_of_preservesDirectedSup (coconeInf_preservesDirectedSup D P f)
 
 /-- **Scott 1972, Corollary 4.3.** Within complete lattices, `D_∞` is also the *direct* limit of
 the `Dₙ` along the embeddings `iₙ`: for every compatible cocone `fₙ : Dₙ → D'` (continuous, with

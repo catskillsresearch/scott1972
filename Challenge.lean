@@ -25,9 +25,10 @@ continuous lattice; \(D_1 = [D_0 \to D_0]\) with a chosen projection pair
 \(i_0, j_0\) (Proposition 3.13); then recursively
 \(D_{n+1} = [D_n \to D_n]\) and \(j_{n+1} = [j_n \to j_n]\) by Proposition 3.7.
 Definition 3.1: \([X \to Y]\) is the space of continuous functions with the
-product topology (pointwise convergence). Theorem 3.3: on continuous lattices
-the lattice topology agrees with that product topology, so the homeomorphism
-is for those topologies.
+product topology (pointwise convergence). The inverse limit has the subspace
+topology induced from the product of the \(D_n\). Theorem 3.3 and Proposition
+4.1 identify these source topologies with the corresponding lattice Scott
+topologies, but the theorem below names the source topologies explicitly.
 
 This file imports only Mathlib. The proofs live in `Scott1972/ContinuousLattice/*`
 and are compared against this file by Comparator via `Solution.lean`.
@@ -88,6 +89,14 @@ noncomputable instance instCompleteLattice : CompleteLattice (ScottMap D D') := 
 
 end ScottMap
 
+/-- **Scott 1972, Definition 3.1 (on lattices).** The literal Pi topology on
+all functions `D → D'`, restricted along the underlying-function map of
+`ScottMap`. -/
+@[reducible] noncomputable def scottMapInducedPiTopology (D D' : Type*)
+    [CompleteLattice D] [CompleteLattice D'] : TopologicalSpace (ScottMap D D') :=
+  TopologicalSpace.induced (fun f : ScottMap D D' => (f : D → D'))
+    (@Pi.topologicalSpace D (fun _ => D') (fun _ => scottTopologicalSpace))
+
 /-- **Scott 1972, Definition 3.6.** A *retraction* of continuous lattices. -/
 structure IsContinuousLatticeRetraction (D D' : Type*) [CompleteLattice D] [CompleteLattice D']
     where
@@ -147,6 +156,12 @@ the proof is in `InverseLimits.lean`. -/
 noncomputable instance instCompleteLattice : CompleteLattice (InverseLimit D P) := by
   sorry
 
+/-- **Scott 1972, §4.** The inverse-limit subspace topology induced by
+`Subtype.val` from the Pi product of the stage Scott topologies. -/
+@[reducible] noncomputable def inverseLimitTopology : TopologicalSpace (InverseLimit D P) :=
+  TopologicalSpace.induced (Subtype.val : InverseLimit D P → ∀ n, D n)
+    (@Pi.topologicalSpace ℕ D (fun _ => scottTopologicalSpace))
+
 end InverseLimit
 
 section LimitMaps
@@ -171,10 +186,8 @@ theorem theorem_4_4 (h₀ : IsContinuousLattice D₀.carrier) :
     @IsContinuousLattice (DInf D₀ j₀) inferInstance ∧
       Nonempty
         (@Homeomorph (DInf D₀ j₀) (DInfFn D₀ j₀)
-          (@scottTopologicalSpace (DInf D₀ j₀) inferInstance)
-          (@scottTopologicalSpace (DInfFn D₀ j₀)
-            (@ScottMap.instCompleteLattice (DInf D₀ j₀) (DInf D₀ j₀)
-              inferInstance inferInstance))) := by
+          (inverseLimitTopology (towerType D₀) (towerProj D₀ j₀))
+          (scottMapInducedPiTopology (DInf D₀ j₀) (DInf D₀ j₀))) := by
   sorry
 
 end LimitMaps

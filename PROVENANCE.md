@@ -17,9 +17,11 @@ the 1972 paper alone, following the same Challenge / Solution pattern as
 [`catskillsresearch/cardb`](https://github.com/catskillsresearch/cardb).
 
 The compared Palomar claim is Scott's Theorem 4.4: the inverse limit `D_∞`
-of the function-space tower is a continuous lattice homeomorphic, in the
-Scott topology, to `[D_∞ → D_∞]`. The full §2–§4 development lives in
-`Scott1972/ContinuousLattice/*`.
+of the function-space tower is a continuous lattice homeomorphic to
+`[D_∞ → D_∞]`. The compared `Homeomorph` names the source topologies exactly:
+the product/subspace inverse-limit topology and the pointwise Pi topology on
+the function space. The proof uses Scott's displayed `i∞`/`j∞` formulas. The
+full §2–§4 development lives in `Scott1972/ContinuousLattice/*`.
 
 Palomar reviews and, if registered, preserves a pinned commit of *this*
 repository.

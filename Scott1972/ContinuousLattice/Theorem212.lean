@@ -235,6 +235,116 @@ theorem theorem_2_12 {D : Type u} [TopologicalSpace D] [T0Space D] :
   exact @IsInjectiveSpace.of_retract E D τE _ (theorem_2_12_forward hE)
     ⟨⇑h, h.continuous⟩ ⟨⇑h.symm, h.symm.continuous⟩ (fun d => h.left_inv d)
 
+/-! ### Theorem 2.12 on a pre-existing complete lattice
+
+The backward direction above initially supplies a homeomorphic continuous lattice.  When the
+specialization order of the given topology is already a specified complete-lattice order, the
+homeomorphism is automatically an order isomorphism.  The following transport lemmas recover that
+exact lattice structure and its Scott topology. -/
+
+section Theorem212Transfer
+
+variable {A B : Type u} [latticeA : CompleteLattice A] [latticeB : CompleteLattice B]
+
+/-- An order isomorphism pulls Scott-open sets back to Scott-open sets. -/
+theorem scottOpen_preimage_orderIso (e : A ≃o B) {U : Set B} (hU : ScottOpen U) :
+    ScottOpen (e ⁻¹' U) := by
+  refine ⟨fun x y hxy hx => hU.1 (e.monotone hxy) hx, ?_⟩
+  intro S hSne hSdir hsup
+  have hImgNe : (e '' S).Nonempty := hSne.image e
+  have hImgDir : DirectedOn (· ≤ ·) (e '' S) := by
+    rintro _ ⟨x, hx, rfl⟩ _ ⟨y, hy, rfl⟩
+    obtain ⟨z, hz, hxz, hyz⟩ := hSdir x hx y hy
+    exact ⟨e z, Set.mem_image_of_mem e hz, e.monotone hxz, e.monotone hyz⟩
+  have hmap : e (sSup S) = sSup (e '' S) := by
+    rw [e.map_sSup, sSup_image]
+  obtain ⟨_, ⟨s, hs, rfl⟩, hes⟩ := hU.2 hImgNe hImgDir (hmap ▸ hsup)
+  exact ⟨s, hs, hes⟩
+
+/-- Order isomorphisms preserve Scott's topological way-below relation. -/
+theorem orderIso_wayBelow (e : A ≃o B) {x y : A} (h : x ≪ y) :
+    e x ≪ e y := by
+  obtain ⟨U, hU, hyU, hUsub⟩ := h
+  refine ⟨e.symm ⁻¹' U, scottOpen_preimage_orderIso e.symm hU, ?_, ?_⟩
+  · simpa using hyU
+  · intro z hz
+    have hxz : x ≤ e.symm z := Set.mem_Ici.1 (hUsub hz)
+    exact Set.mem_Ici.2 (by simpa using (e.le_iff_le.mpr hxz))
+
+/-- Scott's topological way-below relation is invariant under order isomorphism. -/
+theorem orderIso_wayBelow_iff (e : A ≃o B) {x y : A} :
+    x ≪ y ↔ e x ≪ e y :=
+  ⟨orderIso_wayBelow e, fun h => by
+    simpa using orderIso_wayBelow e.symm h⟩
+
+/-- Continuous-lattice structure transfers across an order isomorphism. -/
+theorem IsContinuousLattice.orderIso (e : A ≃o B) (hB : IsContinuousLattice B) :
+    IsContinuousLattice A := by
+  intro y
+  refine ⟨fun x hx => hx.le, fun b hb => ?_⟩
+  apply e.le_iff_le.mp
+  exact (hB (e y)).2 fun z hz => by
+    have hz' : e.symm z ≪ y := by
+      simpa using orderIso_wayBelow e.symm hz
+    have := hb hz'
+    simpa using e.monotone this
+
+/-- An order isomorphism is a homeomorphism between the corresponding Scott topologies. -/
+noncomputable def orderIsoScottHomeomorph (e : A ≃o B) :
+    @Homeomorph A B (@scottTopologicalSpace A latticeA)
+      (@scottTopologicalSpace B latticeB) := by
+  letI : TopologicalSpace A := @scottTopologicalSpace A latticeA
+  letI : TopologicalSpace B := @scottTopologicalSpace B latticeB
+  letI : Preorder A := latticeA.toPreorder
+  letI : Preorder B := latticeB.toPreorder
+  exact {
+  toEquiv := e.toEquiv
+  continuous_toFun := by
+    rw [continuous_def]
+    intro U hU
+    exact isOpen_iff_scottOpen.mpr
+      (scottOpen_preimage_orderIso e (isOpen_iff_scottOpen.mp hU))
+  continuous_invFun := by
+    rw [continuous_def]
+    intro U hU
+    exact isOpen_iff_scottOpen.mpr
+      (scottOpen_preimage_orderIso e.symm (isOpen_iff_scottOpen.mp hU))
+  }
+
+/-- **Theorem 2.12, source-faithful exact-order form.** If an injective `T₀` topology on an
+already specified complete lattice has that lattice order as its specialization order, then the
+specified lattice is continuous and the given topology is exactly its Scott topology. -/
+theorem theorem_2_12_backward_exact [τA : TopologicalSpace A] [T0Space A]
+    (hA : IsInjectiveSpace.{u, u} A)
+    (hspec : ∀ x y : A, SpecializationLe x y ↔ @LE.le A latticeA.toLE x y) :
+    IsContinuousLattice A ∧
+      (@scottTopologicalSpace A latticeA) = τA := by
+  obtain ⟨E, instE, hE, ⟨h⟩⟩ := theorem_2_12_backward hA
+  letI : CompleteLattice E := instE
+  letI : TopologicalSpace E := @scottTopologicalSpace E instE
+  letI : Preorder A := latticeA.toPreorder
+  letI : Preorder E := instE.toPreorder
+  let e : A ≃o E := h.toEquiv.toOrderIso
+    (fun x y hxy => by
+      exact specializationLe_scott_iff.mp
+        (SpecializationLe.map ((hspec x y).mpr hxy) h.continuous))
+    (fun x y hxy => by
+      exact (hspec (h.symm x) (h.symm y)).mp
+        (SpecializationLe.map (specializationLe_scott_iff.mpr hxy) h.symm.continuous))
+  have hcont : IsContinuousLattice A := IsContinuousLattice.orderIso e hE
+  refine ⟨hcont, ?_⟩
+  have heqOrder :
+      (@scottTopologicalSpace A latticeA) =
+        TopologicalSpace.induced (e : A → E) (@scottTopologicalSpace E instE) := by
+    letI : TopologicalSpace A := @scottTopologicalSpace A latticeA
+    exact (@orderIsoScottHomeomorph A E latticeA instE e).isInducing.eq_induced
+  have heqHome :
+      τA = TopologicalSpace.induced (h : A → E) (@scottTopologicalSpace E instE) :=
+    (@Homeomorph.isInducing A E τA (@scottTopologicalSpace E instE) h).eq_induced
+  exact heqOrder.trans heqHome.symm
+
+end Theorem212Transfer
+
 /-! ### Lemma 3.9: compatibility of maximal extensions with a projection on the range -/
 
 section Lemma39

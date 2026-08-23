@@ -4,7 +4,7 @@
   "access_right": "open",
   "language": "eng",
   "version": "1.0.0",
-  "description": "Complete machine-checked Lean 4 formalization of Dana Scott's 1972 paper Continuous Lattices (LNM 274), including the March 1972 Milner correction. Formalizes 43 numbered results from Sections 1--4 (injective T0-spaces, continuous lattices, Scott topology, way-below, projections, function spaces, inverse limits, and Theorem 4.4: D∞ homeomorphic to [D∞ → D∞]). Sorry-free; classical footprint [propext, Classical.choice, Quot.sound]. Primary readable artifact: arxiv.pdf. Source repository: https://github.com/catskillsresearch/scott1972. Companion preprint: https://arxiv.org/abs/2606.30782",
+  "description": "Complete machine-checked Lean 4 formalization of Dana Scott's 1972 paper Continuous Lattices (LNM 274), including the March 1972 Milner correction. Formalizes 43 numbered results from Sections 1--4 (injective T0-spaces, continuous lattices, Scott topology, way-below, projections, function spaces, inverse limits, and Theorem 4.4: D∞ with its product/subspace inverse-limit topology homeomorphic to [D∞ → D∞] with its pointwise Pi topology). Proposition 4.1 follows Scott's Proposition 3.8, Lemma 3.9, injectivity, and Theorem 2.12 route; Lemma 4.5 follows Scott's induction; Theorem 4.4 uses Scott's displayed i∞ and j∞ formulas. Sorry-free; classical footprint [propext, Classical.choice, Quot.sound]. Dana Scott was not contacted and did not participate in, review, or endorse this formalization. Primary readable artifact: arxiv.pdf. Source repository: https://github.com/catskillsresearch/scott1972. Companion preprint: https://arxiv.org/abs/2606.30782",
   "creators": [
     {
       "name": "Ericson, Lars Warren",

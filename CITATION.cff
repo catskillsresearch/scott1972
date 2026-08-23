@@ -14,7 +14,9 @@ abstract: >-
   Complete machine-checked Lean 4 formalization of Dana Scott's 1972 paper
   Continuous Lattices (LNM 274), including the March 1972 Milner correction.
   Formalizes 43 numbered results through Theorem 4.4
-  (D∞ homeomorphic to [D∞ → D∞]).
+  (D∞ with its product/subspace inverse-limit topology homeomorphic to
+  [D∞ → D∞] with its pointwise Pi topology). Dana Scott was not contacted
+  and did not participate in, review, or endorse this formalization.
 keywords:
   - Lean 4
   - continuous lattices

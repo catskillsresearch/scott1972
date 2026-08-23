@@ -88,7 +88,8 @@ arc of the paper: starting topologically, he introduces spaces with a strong ext
 continuous maps; shows they are exactly the continuous lattices—complete lattices whose topology is
 the Scott topology determined by the order; studies projections, subspaces, embeddings, products,
 and function spaces; and proves the main result that one can embed every space in a continuous
-lattice $D_\infty$ that is homeomorphic (and order-isomorphic) to its own function space
+lattice $D_\infty$ whose product/subspace inverse-limit topology is homeomorphic to the pointwise
+Pi topology on its own function space
 $[D_\infty \to D_\infty]$, yielding models for the Church–Curry $\lambda$-calculus.
 
 Scott organizes the paper in four technical sections (following an introductory §0):
@@ -185,14 +186,14 @@ both Scott and Lean.
 | 3 | Prop 3.12 | `proposition_3_12`, `IsProjection`, `isProjection_sSup`, `Projections.instCompleteLattice` | `FunctionSpaces.lean` |
 | 3 | Prop 3.13 | `proposition_3_13`, `Proposition313.projection` | `FunctionSpaces.lean` |
 | 3 | Prop 3.14 | `proposition_3_14`, `Proposition314.fixMap`, `fix_eq`, `fix_le`, `fix_unique` | `FunctionSpaces.lean` |
-| 4 | Prop 4.1 | `proposition_4_1`, `InverseLimit`, `inverseLimitRetraction` | `InverseLimits.lean` |
+| 4 | Prop 4.1 | `proposition_4_1`, `InverseLimit`, `inverseLimitTopology`, `inverseLimit_isInjectiveSpace` | `InverseLimits.lean` |
 | 4 | Prop 4.2 | `proposition_4_2`, `embInf`, `projInf`, `iComp`, `embInf_succ`, `inverseLimit_eq_iSup` | `InverseLimits.lean` |
 | 4 | Cor 4.3 | `corollary_4_3`, `coconeInf`, `coconeInf_comp_embInf` | `InverseLimits.lean` |
 | 4 | Lemma 4.5 | `lemma_4_5`, `idInf_eq_iSup` | `InverseLimits.lean` |
 | 4 | Thm 4.4(a) | `embInfInf`, `projInfInf`, `iInfTerm`, `jInfTerm`, `*_apply`, `*_preservesDirectedSup` | `FunctionSpaceTower.lean` |
 | 4 | Thm 4.4(b) | `projInfInf_comp_embInfInf` | `FunctionSpaceTower.lean` |
 | 4 | Thm 4.4(c) | `embInfInf_comp_projInfInf` | `FunctionSpaceTower.lean` |
-| 4 | Thm 4.4(d) | `theorem_4_4`, `theorem_4_4_inverses`, `theorem_4_4_homeomorph`, `theorem_4_4_orderIso` | `FunctionSpaceTower.lean` |
+| 4 | Thm 4.4(d) | `theorem_4_4`, `theorem_4_4_inverses`, `theorem_4_4_sourceTopology_homeomorph`, `theorem_4_4_orderIso` | `FunctionSpaceTower.lean` |
 
 ### 4.1 Proof dependency structure
 
@@ -358,15 +359,17 @@ flowchart TD
 Scott §4 is complete in Lean: Propositions 4.1–4.2, Corollary 4.3, Lemma 4.5, and Theorem 4.4
 **(a)–(d)**. See §5.3 for proof notes on the capstone.
 
-The Lean proof of Proposition 4.1 uses the order-theoretic adjoint route (Props 2.9a and 2.10a),
-not Scott's injectivity route through Propositions 3.8 and Lemma 3.9. Lemma 4.5 enters Theorem
-4.4(c); Lemma 3.9 is not used in the capstone proof.
+The Lean proof of Proposition 4.1 follows Scott's source route: Proposition 3.8 constructs maximal
+coordinate extensions, Lemma 3.9 makes them compatible, and injectivity plus Theorem 2.12 yields
+the continuous lattice and identifies its Scott topology with the product/subspace inverse-limit
+topology. Lemma 4.5 follows Scott's induction and enters Theorem 4.4(c).
 
 ```mermaid
 flowchart TD
   P37["proposition_3_7_*"]
-  P29a["proposition_2_9_a (∏ CL)"]
-  P210a["proposition_2_10_a (retract)"]
+  P38["proposition_3_8 (maximal extension)"]
+  L39["lemma_3_9 (compatibility)"]
+  T212["theorem_2_12_backward_exact"]
   P41["proposition_4_1"]
   P42["proposition_4_2"]
   C43["corollary_4_3"]
@@ -376,8 +379,9 @@ flowchart TD
   T44c["Thm 4.4(c) i∞∘j∞=id"]
   T44d["Thm 4.4(d) homeomorph"]
 
-  P29a --> P41
-  P210a --> P41
+  P38 --> P41
+  L39 --> P41
+  T212 --> P41
   P41 --> P42
   P41 --> C43
   P42 --> C43
@@ -891,45 +895,32 @@ rather than coerce — the binders must be written `∀ f : ScottMap D D`. Conti
 
 ### 5.3 Inverse limits (Scott §4)
 
-Section §4 constructs $D_\infty$ and proves Theorem 4.4. The adjoint route to Proposition 4.1 and
-the function-space tower scaffolding for 4.4 are the main engineering contributions beyond Scott's
-text.
+Section §4 constructs $D_\infty$ and proves Theorem 4.4. Proposition 4.1 follows Scott's
+Proposition-3.8/Lemma-3.9 injectivity route, while the explicit topology bridges and the
+function-space tower scaffolding for 4.4 are the main engineering contributions.
 
 #### Proposition 4.1 (inverse limit of projections is a continuous lattice) — `proposition_4_1` (`InverseLimits.lean`)
 
 `D∞ = { x : ∀n, Dₙ // ∀n, jₙ(xₙ₊₁) = xₙ }` for an ω-system of continuous lattices with projection
-bonding maps `jₙ : D_{n+1} → Dₙ`. Scott proves continuity *topologically* (show `D∞` is an injective
-`T₀`-space, then Theorem 2.12), using the maximal extension 3.8 and the compatibility 3.9. We realize
-the **same retraction order-theoretically, with no topology**, which sidesteps a genuine soundness
-trap (the subspace Scott topology on `D∞` need not equal its own Scott topology, so the inclusion is
-not obviously a Scott embedding — the hypothesis 3.8/3.9 silently need).
+bonding maps `jₙ : D_{n+1} → Dₙ`. Its named topology `inverseLimitTopology` is exactly the subspace
+topology induced from the Pi product of the stage Scott topologies. Each projection is also an
+adjunction, so its upper adjoint preserves arbitrary infima; this establishes the componentwise
+complete-lattice structure on compatible sequences.
 
-The key observation: each projection is an **adjunction**. From `jₙ∘iₙ = id` and `iₙ∘jₙ ⊑ id` we get
-`GaloisConnection iₙ jₙ` (`projection_galoisConnection`), so `jₙ` (the upper adjoint) preserves
-arbitrary infima (`retr_sInf`). Hence:
+The proof of Proposition 4.1 itself follows Scott's topological argument. Given a continuous
+`f : X → D∞` and a subspace embedding `e : X → Y`, define the `n`-th coordinate extension
+`\bar f_n : Y → D_n` by Proposition 3.8's maximal extension. Lemma 3.9 gives
+`j_n ∘ \bar f_{n+1} = \bar f_n`, so the extensions assemble into a continuous map
+`Y → D∞`; continuity is coordinatewise for the Pi-induced subspace topology. Thus `D∞` is an
+injective `T₀`-space. `theorem_2_12_backward_exact`, together with the proof that specialization
+in the subspace topology is componentwise order, yields both `IsContinuousLattice D∞` and
+`scottTopologicalSpace = inverseLimitTopology`.
 
-- the compatibility predicate is closed under **pointwise `sInf`** (`compatible_sInf`), so `D∞` is a
-  complete lattice by `completeLatticeOfInf`;
-- the inclusion `D∞ ↪ ∏Dₙ` preserves infima, so it has a **left adjoint** `r : ∏Dₙ → D∞`,
-  `r y = ⊓{ x ∈ D∞ : y ⊑ x }` (`invLimRetr`, `invLimRetr_galoisConnection`); a left adjoint preserves
-  *all* suprema (`GaloisConnection.l_sSup`), in particular directed ones, so `r` is Scott-continuous,
-  and `r∘incl = id` (`invLimRetr_incl`);
-- the inclusion itself is Scott-continuous because directed sups of compatible sequences are
-  pointwise (each `jₙ` is Scott-continuous), so `D∞`'s directed sups agree with the ambient ones
-  (`coe_sSup_of_directed`).
-
-Thus `D∞` is a Scott-continuous **retract** of `∏Dₙ`, which is a continuous lattice (Prop 2.9a), so
-Prop 2.10a gives `IsContinuousLattice D∞`. This `r` is exactly the retraction Scott's injectivity
-argument constructs (extend `id_{D∞}` along the inclusion), here obtained directly as an adjoint.
-
-**Engineering notes / lessons from 4.1:** `IsContinuousLattice` is purely order-theoretic and 2.10a
-transfers it across a *Scott-continuous retraction* with no topology, which is what makes the adjoint
-route viable. Two friction points: coordinatewise `sInf`/`sSup` of a product are reached through
-`sInf_apply_eq_sInf_image`/`sSup_apply_eq_sSup_image`, and the resulting set equalities are best
-closed with `Set.image_image` + `Set.image_congr` (using compatibility pointwise) rather than `ext`
-(whose membership unfolds to `Function.eval` with the wrong orientation). The directed-sup-is-pointwise
-lemma is proved by exhibiting the pointwise sup as an explicit `IsLUB` and invoking
-`(isLUB_sSup S).unique`. Footprint `[propext, Classical.choice, Quot.sound]`.
+**Engineering notes / lessons from 4.1:** the complete lattice remains the componentwise one, while
+the injectivity proof deliberately installs the named product/subspace topology only locally.
+Explicitly preserving the specialization order is what lets Theorem 2.12 return the topology
+identification needed by Theorem 4.4, rather than merely the order-theoretic lattice result.
+Footprint `[propext, Classical.choice, Quot.sound]`.
 
 #### Proposition 4.2 (the maps `j_{∞n}` are projections) — `proposition_4_2` (`InverseLimits.lean`)
 
@@ -997,11 +988,11 @@ Footprint `[propext, Classical.choice, Quot.sound]`.
 
 `lemma_4_5` is Scott's tool for *recognizing projections from limits*: if `u : ∀ n, D_{n+1}` obeys the
 shifted recursion `j_{n+1}(u_{n+2}) = u_{n+1}`, then `u_∞ = ⨆ₙ i_{(n+1)∞}(uₙ)` has
-`j_{∞(n+1)}(u_∞) = uₙ`. The trick is to *extend* `u` to a genuinely compatible sequence
-`w` (`w₀ = j₀(u₀)`, `w_{k+1} = u_k`; compatibility at `k=0` is `rfl`, at `k+1` it is the hypothesis),
-so `w ∈ D_∞`. Since the family `k ↦ i_{k∞}(w_k)` is monotone (`embInf_le_succ`), dropping its `0`-th
-term leaves the lub unchanged (`Monotone.iSup_nat_add … 1`), giving `u_∞ = ⨆ₖ i_{k∞}(w_k) = w` by
-`inverseLimit_eq_iSup`; hence `j_{∞(n+1)}(u_∞) = w_{n+1} = uₙ` by definitional unfolding of `w`.
+`j_{∞(n+1)}(u_∞) = uₙ`. The proof follows Scott's induction. First the defining family is monotone,
+so continuity moves `j_{∞(n+1)}` through its directed supremum. For every `m ≥ n`, induction on
+`m - n` proves `j_{∞(n+1)}(i_{(m+1)∞}(u_m)) = u_n`: peel one projection using `projLE_succ`, then
+apply the recursion hypothesis. Terms with `m < n` are bounded by the diagonal term, and the
+projected supremum is therefore exactly `u_n`.
 
 #### Theorem 4.4 scaffolding — `FunctionSpaceTower.lean`
 
@@ -1012,11 +1003,11 @@ the *lattice structure* at level `n`, we bundle carrier + instance in `CLat` and
 crucially `towerType_succ : D_{n+1} = [Dₙ→Dₙ]` holds by `rfl`, with a `CoeFun` (`towerCoeFun`) letting
 us apply a `D_{n+1}` element directly as a function `Dₙ → Dₙ`.
 
-The bonding maps come from a continuous form of Proposition 3.7: `conjMap post pre` (`f ↦ post∘f∘pre`)
-is Scott-continuous (directed sups in `[Y→Y]` are pointwise, so the conjugate commutes with them),
-whence `IsContinuousLatticeProjection.functionSpace` makes `[D→D]` a projection of `[D'→D']` from a
-projection `D ◁ D'`. Iterating from a chosen base `j₀ : [D₀→D₀] ◁ D₀` (Proposition 3.13 supplies one)
-gives the projection tower `towerProj`. The Scott recursion/algebra laws are then definitional:
+The bonding maps are exactly Proposition 3.7 specialized diagonally. `conjMap post pre`
+(`f ↦ post∘f∘pre`) is Scott-continuous because directed sups in `[Y→Y]` are pointwise, and supplies
+the outer continuity needed to bundle Proposition 3.7's canonical plain maps. Iterating from a
+chosen base `j₀ : [D₀→D₀] ◁ D₀` (Proposition 3.13 supplies one) gives the projection tower
+`towerProj`. The Scott recursion/algebra laws are then definitional:
 `towerProj_succ_incl_apply` (`i_{n+1}(x)=iₙ∘x∘jₙ`), `towerProj_succ_retr_apply` (`j_{n+1}=jₙ∘·∘iₙ`),
 and `towerProj_incl_apply` (`iₙ(f(x))=i_{n+1}(f)(iₙ(x))`, application preserved one level up).
 
@@ -1045,7 +1036,7 @@ from `ScottMap.sSup_apply` + `Set.range_comp`, and the `*_apply` reductions of t
 - **(a)** `embInfInf` / `projInfInf`: define $i_\infty$/$j_\infty$ as Scott maps (suprema of Scott maps).
 - **(b)** `projInfInf_comp_embInfInf`: $j_\infty \circ i_\infty = \mathrm{id}$ on $D_\infty$.
 - **(c)** `embInfInf_comp_projInfInf`: $i_\infty \circ j_\infty = \mathrm{id}$ on $[D_\infty \to D_\infty]$.
-- **(d)** `theorem_4_4`: Scott's statement — $D_\infty$ is a continuous lattice homeomorphic to $[D_\infty \to D_\infty]$; `theorem_4_4_inverses` is the inverse pair in the proof; `theorem_4_4_homeomorph` packages that pair as a homeomorphism; `theorem_4_4_orderIso` is the companion lattice isomorphism from Scott's abstract.
+- **(d)** `theorem_4_4`: Scott's statement — $D_\infty$ is a continuous lattice whose product/subspace inverse-limit topology is homeomorphic to the pointwise Pi topology on $[D_\infty \to D_\infty]$; `theorem_4_4_inverses` is the inverse pair in the proof; `theorem_4_4_sourceTopology_homeomorph` packages that pair with the source topologies; `theorem_4_4_orderIso` is the companion lattice isomorphism from Scott's abstract.
 
 **Thm 4.4(b) — `projInfInf_comp_embInfInf`.** Goal: $j_\infty \circ i_\infty = \mathrm{id}$ on $D_\infty$. Following Scott's
 calculation, expand `j∞(i∞(x)) = ⨆ₙ jInfTerm n (i∞ x)`. Pushing the two conjugations through the
@@ -1079,8 +1070,11 @@ evaluated `i∞(j∞ f) z`. Footprint `[propext, Classical.choice, Quot.sound]`.
 homeomorphic to $[D_\infty \to D_\infty]$. `theorem_4_4_inverses` bundles the two composition
 identities from the proof (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`); helper
 lemmas `projInfInf_embInfInf` / `embInfInf_projInfInf` apply those equalities pointwise.
-`theorem_4_4_homeomorph` packages that pair as a homeomorphism of Scott topologies.
-`theorem_4_4` conjoins Proposition 4.1 (continuous lattice) with that homeomorphism.
+`theorem_4_4_scottTopology_homeomorph` first packages that pair using lattice Scott topologies.
+The topology equalities from Proposition 4.1 and Theorem 3.3 then produce
+`theorem_4_4_sourceTopology_homeomorph`, whose domain is the product/subspace inverse-limit
+topology and whose codomain is Definition 3.1's pointwise Pi topology.
+`theorem_4_4` conjoins Proposition 4.1 with that explicit source-topology homeomorphism.
 `theorem_4_4_orderIso` is the companion lattice isomorphism (Scott's abstract: “homeomorphic
 (and isomorphic)”); it is not the numbered theorem. The Palomar compared claim is `theorem_4_4`.
 Footprint

@@ -43,5 +43,10 @@ bash scripts/compare_challenge_solution_types.sh
 
 `Challenge.lean` imports only Mathlib and states `theorem_4_4` in the wording of
 `sources/ScottContinLatt1972.md` (Theorem 4.4) with a deliberate `sorry`. The
-proof is in `FunctionSpaceTower.lean`, imported by `Solution.lean`.
+explicit `Homeomorph` uses the product/subspace topology on the inverse limit
+and Definition 3.1's pointwise Pi topology on its function space. The proof is
+in `FunctionSpaceTower.lean`, imported by `Solution.lean`. Proposition 4.1
+follows Scott's Proposition 3.8 + Lemma 3.9 + injectivity + Theorem 2.12 route;
+Lemma 4.5 follows Scott's induction. The homeomorphism is built from Scott's
+displayed formulas for `i∞` and `j∞`.
 The compared theorem uses `propext`, `Classical.choice`, and `Quot.sound` only.

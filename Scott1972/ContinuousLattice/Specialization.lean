@@ -45,6 +45,18 @@ theorem specializationLe_antisymm [T0Space X] {x y : X}
     ⟨specializes_iff_forall_open.2 fun s hs hy => hyx s hs hy,
      specializes_iff_forall_open.2 fun s hs hx => hxy s hs hx⟩)
 
+/-- Scott's specialization order is the reverse of Mathlib's `Specializes` convention. -/
+theorem specializationLe_iff_specializes {x y : X} :
+    SpecializationLe x y ↔ y ⤳ x :=
+  specializes_iff_forall_open.symm
+
+/-- Continuous maps preserve Scott's specialization order. -/
+theorem SpecializationLe.map {Y : Type*} [TopologicalSpace Y] {x y : X}
+    (hxy : SpecializationLe x y) {f : X → Y} (hf : Continuous f) :
+    SpecializationLe (f x) (f y) := by
+  intro U hU hxU
+  exact hxy (f ⁻¹' U) (hU.preimage hf) hxU
+
 /-! ### Scott topology from `ScottOpen` -/
 
 /-- Scott's induced topology on a complete lattice, realized as mathlib's Scott topology. -/
@@ -112,6 +124,29 @@ theorem scottOpen_not_le (L : D) : ScottOpen {z : D | ¬ z ≤ L} := by
   refine hmem (sSup_le fun s hs => ?_)
   by_contra hsL
   exact hcon ⟨s, hs, hsL⟩
+
+/-- The specialization order of the Scott topology is the original lattice order. -/
+theorem specializationLe_scott_iff {x y : D} :
+    @SpecializationLe D scottTopologicalSpace x y ↔ x ≤ y := by
+  constructor
+  · intro hxy
+    by_contra h
+    exact hxy {z | ¬ z ≤ y} (isOpen_iff_scottOpen.mpr (scottOpen_not_le y)) h (by simp)
+  · intro hxy U hU hxU
+    exact (isOpen_iff_scottOpen.mp hU).1 hxy hxU
+
+/-- The Scott topology of a partial order is `T₀`. -/
+theorem scottTopology_t0Space : @T0Space D scottTopologicalSpace := by
+  letI : TopologicalSpace D := scottTopologicalSpace
+  constructor
+  intro x y hxy
+  apply le_antisymm
+  · rw [← specializationLe_scott_iff]
+    intro U hU hxU
+    exact (hxy.mem_open_iff hU).mp hxU
+  · rw [← specializationLe_scott_iff]
+    intro U hU hyU
+    exact (hxy.mem_open_iff hU).mpr hyU
 
 omit [IsDirected ι (· ≤ ·)] in
 /-- **Scott 1972, Proposition 2.1 (forward).** If a monotone net converges to `y` in the Scott
