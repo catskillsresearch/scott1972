@@ -40,9 +40,14 @@ status:
     continuous lattice D₀ and projection j₀, the inverse limit D_∞ of the
     function-space tower is a continuous lattice homeomorphic to [D_∞ → D_∞].
     The Homeomorph names Scott's product/subspace inverse-limit topology and
-    Definition 3.1 pointwise function-space topology explicitly.
+    Definition 3.1 pointwise function-space topology explicitly. Challenge.lean
+    fixes the function-space lattice by pointwise order and pointwise suprema,
+    the inverse-limit lattice by coordinatewise order and infima, and the
+    projection tower by the recursive Proposition 3.7 conjugation formulas.
     The broader paper (Theorems 2.12, 3.3, 4.1, etc.) is formalized in the
-    same library but is not part of the Comparator-compared family.
+    same library but is not part of the advertised Comparator result; the
+    additional Comparator theorem targets are proof obligations used only to
+    lock these concrete definition bodies.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -170,6 +175,10 @@ known_gaps: []
 
 limitations:
   - >-
+    The historical introduction treats Scott's D_∞ construction as a landmark
+    early model but does not establish comparative priority over other early
+    models of the untyped lambda calculus.
+  - >-
     The Comparator-compared family is Theorem 4.4 and the definitions it
     mentions, not the full Scott 1972 inventory in arxiv.md.
   - >-
@@ -225,9 +234,12 @@ alignment:
 
     - source: "Scott 1972, Theorem 3.3: [D → D'] is a complete lattice"
       lean: "ScottMap.instCompleteLattice"
-      module: "Challenge (hole), FunctionSpaces.lean (proof)"
+      module: "Challenge (concrete construction), FunctionSpaces.lean (proof)"
       status: proved
-      note: "Compared as a definition; Challenge leaves a sorry instance."
+      note: >-
+        Comparator checks the concrete body generated from pointwise order
+        and pointwise arbitrary suprema. Only continuity and least-upper-bound
+        proof obligations are theorem holes in Challenge.
 
     - source: "Scott 1972, §2: induced (Scott) topology on a lattice"
       lean: "scottTopologicalSpace"

@@ -29,7 +29,7 @@ $\texttt{[propext, Classical.choice, Quot.sound]}$.
 ---
 
 ## 1. Introduction
-Scott's 1972 paper *Continuous Lattices* is his first fully detailed,
+Scott's 1972 paper *Continuous Lattices* is a fully detailed,
 peer-reviewed publication of the $D_\infty$ model for the semantics of Church's untyped
 $\lambda$-calculus—but with one crucial historical nuance: **the model was a complete accident**.
 While the 1972 paper is the landmark account, Scott had been trying to prove that such a model was
@@ -53,8 +53,9 @@ power of a function space strictly exceeds the size of the base set.
 In November 1969, while attempting to formalize why this restriction made untyped models impossible,
 Scott realized that if one restricts to Scott-continuous functions (those preserving directed
 suprema) rather than all arbitrary functions, the space does not explode in size. By constructing an
-inverse limit of algebraic lattices ($D_0 \to D_1 \to D_2 \to \cdots$), he built $D_\infty$, the
-first non-degenerate, purely mathematical model of the untyped $\lambda$-calculus.
+inverse limit of algebraic lattices ($D_0 \to D_1 \to D_2 \to \cdots$), he built $D_\infty$, a
+landmark non-degenerate mathematical model of the untyped $\lambda$-calculus. This account does
+not establish comparative priority over other early models.
 
 ### Chronology of the papers
 
@@ -62,7 +63,8 @@ Although the definitive mathematical breakdown appeared in 1972, Scott's "first 
 tightly knit manuscripts:
 
 - **1969 (unpublished manuscript):** **[Sco69]** *Lattice-theoretic models for the $\lambda$-calculus*—the
-  literal first write-up distributed among colleagues right after the November discovery.
+  earliest write-up in the Scott manuscript sequence discussed here, distributed among colleagues
+  after the November discovery. No broader historical priority claim is intended.
 - **1970 (conference paper):** **[Sco70]** *Outline of a mathematical theory of computation*—a brief, high-level
   introductory account.
 - **1972 (published paper):** **[Sco72]** *Continuous Lattices*—prepared as a technical report in 1971;

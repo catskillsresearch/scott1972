@@ -57,6 +57,31 @@ def Compatible (x : ∀ n, D n) : Prop := ∀ n, (P n).retr (x (n + 1)) = x n
 /-- **Scott 1972, §4.** The inverse limit `D_∞` as the subspace of compatible sequences. -/
 abbrev InverseLimit : Type u := {x : ∀ n, D n // Compatible D P x}
 
+/-- The inverse limit carries the coordinatewise order inherited from its
+ambient product. This declaration makes that order explicit instead of
+leaving typeclass search to choose an equivalent route. -/
+instance inverseLimitPartialOrder : PartialOrder (InverseLimit D P) where
+  le x y := ∀ n,
+    @LE.le (D n)
+      (ChainCompletePartialOrder.instOfCompleteLattice
+        (α := D n)).toPartialOrder.toPreorder.toLE
+      (x.1 n) (y.1 n)
+  lt x y :=
+    (∀ n,
+      @LE.le (D n)
+        (ChainCompletePartialOrder.instOfCompleteLattice
+          (α := D n)).toPartialOrder.toPreorder.toLE
+        (x.1 n) (y.1 n)) ∧
+      ¬ ∀ n,
+        @LE.le (D n)
+          (ChainCompletePartialOrder.instOfCompleteLattice
+            (α := D n)).toPartialOrder.toPreorder.toLE
+          (y.1 n) (x.1 n)
+  le_refl x n := le_refl (x.1 n)
+  le_trans _ _ _ hxy hyz n := le_trans (hxy n) (hyz n)
+  le_antisymm x y hxy hyx :=
+    Subtype.ext (funext fun n => le_antisymm (hxy n) (hyx n))
+
 /-- **Scott 1972, §4 (topological inverse limit).** The explicit subspace topology on compatible
 sequences, induced by `Subtype.val` from the Mathlib Pi topology of the stage Scott topologies.
 This is a named topology, not an instance, so it introduces no topology-instance diamond. -/
@@ -81,36 +106,42 @@ theorem retr_sInf (n : ℕ) (A : Set (D (n + 1))) :
     (P n).retr (sInf A) = sInf ((P n).retr '' A) := by
   rw [(projection_galoisConnection D P n).u_sInf, sInf_image]
 
+/-- The coordinatewise infimum of a family of compatible sequences, before
+packaging the compatibility proof. -/
+noncomputable def inverseLimitSInfCoe (S : Set (InverseLimit D P)) : ∀ n, D n :=
+  fun n => sInf ((fun x : InverseLimit D P => x.1 n) '' S)
+
 /-- The pointwise infimum of compatible sequences is compatible. -/
 theorem compatible_sInf (S : Set (InverseLimit D P)) :
-    Compatible D P (sInf (Subtype.val '' S)) := by
+    Compatible D P (inverseLimitSInfCoe D P S) := by
   intro n
-  rw [sInf_apply_eq_sInf_image, sInf_apply_eq_sInf_image, retr_sInf]
+  rw [inverseLimitSInfCoe, inverseLimitSInfCoe, retr_sInf]
   congr 1
   rw [Set.image_image]
-  exact Set.image_congr (by rintro _ ⟨x, _, rfl⟩; exact x.2 n)
+  exact Set.image_congr (by rintro x hx; exact x.2 n)
 
 noncomputable instance : InfSet (InverseLimit D P) :=
-  ⟨fun S => ⟨sInf (Subtype.val '' S), compatible_sInf D P S⟩⟩
+  ⟨fun S => ⟨inverseLimitSInfCoe D P S, compatible_sInf D P S⟩⟩
 
 theorem coe_sInf (S : Set (InverseLimit D P)) :
-    ((sInf S : InverseLimit D P) : ∀ n, D n) = sInf (Subtype.val '' S) := rfl
+    ((sInf S : InverseLimit D P) : ∀ n, D n) = inverseLimitSInfCoe D P S := rfl
 
-theorem isGLB_sInf' (S : Set (InverseLimit D P)) : IsGLB S (sInf S) := by
+theorem isGLB_sInf' (S : Set (InverseLimit D P)) :
+    @IsGLB (InverseLimit D P)
+      (inverseLimitPartialOrder D P).toPreorder.toLE S (sInf S) := by
   constructor
   · intro x hx
-    refine Subtype.coe_le_coe.mp ?_
-    rw [coe_sInf]
+    intro n
     exact sInf_le (Set.mem_image_of_mem _ hx)
   · intro b hb
-    refine Subtype.coe_le_coe.mp ?_
-    rw [coe_sInf]
+    intro n
     refine le_sInf ?_
     rintro _ ⟨x, hx, rfl⟩
-    exact Subtype.coe_le_coe.mpr (hb hx)
+    exact hb hx n
 
 noncomputable instance instCompleteLattice : CompleteLattice (InverseLimit D P) :=
-  completeLatticeOfInf (InverseLimit D P) (isGLB_sInf' D P)
+  @completeLatticeOfInf (InverseLimit D P) (inverseLimitPartialOrder D P)
+    inferInstance (isGLB_sInf' D P)
 
 /-- For a directed, nonempty family, the inverse-limit supremum is computed pointwise (each `jₙ`
 is Scott-continuous, so the pointwise sup of compatible sequences is compatible and is the least

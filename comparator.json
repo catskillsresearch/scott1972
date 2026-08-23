@@ -2,7 +2,17 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "Scott1972.ContinuousLattice.theorem_4_4"
+    "Scott1972.ContinuousLattice.theorem_4_4",
+    "Scott1972.ContinuousLattice.ScottMap.sSupMaps_continuous",
+    "Scott1972.ContinuousLattice.ScottMap.isLUB_sSup",
+    "Scott1972.ContinuousLattice.functionSpaceInclFun_continuous",
+    "Scott1972.ContinuousLattice.functionSpaceInclFun_outer_continuous",
+    "Scott1972.ContinuousLattice.functionSpaceRetrFun_continuous",
+    "Scott1972.ContinuousLattice.functionSpaceRetrFun_outer_continuous",
+    "Scott1972.ContinuousLattice.functionSpaceRetrIncl",
+    "Scott1972.ContinuousLattice.functionSpaceInclRetrLe",
+    "Scott1972.ContinuousLattice.compatible_sInf",
+    "Scott1972.ContinuousLattice.isGLB_sInf'"
   ],
   "definition_names": [
     "Scott1972.ContinuousLattice.ScottOpen",
@@ -10,15 +20,12 @@
     "Scott1972.ContinuousLattice.IsContinuousLattice",
     "Scott1972.ContinuousLattice.scottTopologicalSpace",
     "Scott1972.ContinuousLattice.ScottMap",
-    "Scott1972.ContinuousLattice.ScottMap.instCompleteLattice",
     "Scott1972.ContinuousLattice.scottMapInducedPiTopology",
     "Scott1972.ContinuousLattice.towerCLat",
     "Scott1972.ContinuousLattice.towerType",
     "Scott1972.ContinuousLattice.towerCompleteLattice",
-    "Scott1972.ContinuousLattice.towerProj",
     "Scott1972.ContinuousLattice.Compatible",
     "Scott1972.ContinuousLattice.InverseLimit",
-    "Scott1972.ContinuousLattice.instCompleteLattice",
     "Scott1972.ContinuousLattice.inverseLimitTopology",
     "Scott1972.ContinuousLattice.DInf",
     "Scott1972.ContinuousLattice.DInfFn"

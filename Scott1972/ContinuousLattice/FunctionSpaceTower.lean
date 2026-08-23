@@ -107,6 +107,81 @@ noncomputable def conjMap (post : ScottMap Y Z) (pre : ScottMap W Y) :
 
 end Conj
 
+/-- Continuity of the inner map `i ∘ f ∘ j`. -/
+theorem functionSpaceInclFun_continuous {D D' : Type u}
+    [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') (f : ScottMap D D) :
+    @Continuous D' D' scottTopologicalSpace scottTopologicalSpace
+      (fun x => P.incl (f (P.retr x))) :=
+  @Continuous.congr D' D' scottTopologicalSpace scottTopologicalSpace
+    (P.incl.comp (f.comp P.retr)).1 (fun x => P.incl (f (P.retr x)))
+    (P.incl.comp (f.comp P.retr)).continuous (fun _ => rfl)
+
+/-- The inclusion part of `[P → P]`, with its underlying function explicit. -/
+def functionSpaceInclFun {D D' : Type u} [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') (f : ScottMap D D) : ScottMap D' D' :=
+  ⟨fun x => P.incl (f (P.retr x)), functionSpaceInclFun_continuous P f⟩
+
+/-- Continuity, in the pointwise function-space topology, of `f ↦ i ∘ f ∘ j`. -/
+theorem functionSpaceInclFun_outer_continuous {D D' : Type u}
+    [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') :
+    @Continuous (ScottMap D D) (ScottMap D' D')
+      scottTopologicalSpace scottTopologicalSpace (functionSpaceInclFun P) := by
+  exact @Continuous.congr (ScottMap D D) (ScottMap D' D')
+    scottTopologicalSpace scottTopologicalSpace (conjMap P.incl P.retr).1
+    (functionSpaceInclFun P) (conjMap P.incl P.retr).continuous
+    (fun f => ScottMap.ext fun _ => rfl)
+
+/-- Continuity of the inner map `j ∘ g ∘ i`. -/
+theorem functionSpaceRetrFun_continuous {D D' : Type u}
+    [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') (g : ScottMap D' D') :
+    @Continuous D D scottTopologicalSpace scottTopologicalSpace
+      (fun x => P.retr (g (P.incl x))) :=
+  @Continuous.congr D D scottTopologicalSpace scottTopologicalSpace
+    (P.retr.comp (g.comp P.incl)).1 (fun x => P.retr (g (P.incl x)))
+    (P.retr.comp (g.comp P.incl)).continuous (fun _ => rfl)
+
+/-- The retraction part of `[P → P]`, with its underlying function explicit. -/
+def functionSpaceRetrFun {D D' : Type u} [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') (g : ScottMap D' D') : ScottMap D D :=
+  ⟨fun x => P.retr (g (P.incl x)), functionSpaceRetrFun_continuous P g⟩
+
+/-- Continuity, in the pointwise function-space topology, of `g ↦ j ∘ g ∘ i`. -/
+theorem functionSpaceRetrFun_outer_continuous {D D' : Type u}
+    [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') :
+    @Continuous (ScottMap D' D') (ScottMap D D)
+      scottTopologicalSpace scottTopologicalSpace (functionSpaceRetrFun P) := by
+  exact @Continuous.congr (ScottMap D' D') (ScottMap D D)
+    scottTopologicalSpace scottTopologicalSpace (conjMap P.retr P.incl).1
+    (functionSpaceRetrFun P) (conjMap P.retr P.incl).continuous
+    (fun g => ScottMap.ext fun _ => rfl)
+
+/-- Retraction law for the diagonal Proposition 3.7 construction. -/
+theorem functionSpaceRetrIncl {D D' : Type u} [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') :
+    ∀ f, functionSpaceRetrFun P (functionSpaceInclFun P f) = f :=
+  (proposition_3_7_projection P P).retr_incl
+
+/-- Projection inequality for the diagonal Proposition 3.7 construction. -/
+theorem functionSpaceInclRetrLe {D D' : Type u} [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') :
+    ∀ g, functionSpaceInclFun P (functionSpaceRetrFun P g) ≤ g := by
+  intro g
+  exact ScottMap.le_def.mpr ((proposition_3_7_projection P P).incl_retr_le g)
+
+/-- Scott's Proposition 3.7 construction specialized diagonally. -/
+noncomputable def functionSpaceProjection
+    {D D' : Type u} [CompleteLattice D] [CompleteLattice D']
+    (P : IsContinuousLatticeProjection D D') :
+    IsContinuousLatticeProjection (ScottMap D D) (ScottMap D' D') where
+  incl := ⟨functionSpaceInclFun P, functionSpaceInclFun_outer_continuous P⟩
+  retr := ⟨functionSpaceRetrFun P, functionSpaceRetrFun_outer_continuous P⟩
+  retr_incl := functionSpaceRetrIncl P
+  incl_retr_le := functionSpaceInclRetrLe P
+
 /-- The projection tower from Scott's recursion immediately before Theorem 4.4:
 `j_{n+1} = [j_n → j_n]`, anchored at `j₀ : [D₀ → D₀] → D₀`.
 
@@ -117,13 +192,7 @@ noncomputable def towerProj (D₀ : CLat.{u})
     (j₀ : IsContinuousLatticeProjection D₀.carrier (ScottMap D₀.carrier D₀.carrier)) :
     ∀ n, IsContinuousLatticeProjection (towerType D₀ n) (towerType D₀ (n + 1))
   | 0 => j₀
-  | (n + 1) =>
-      let P := towerProj D₀ j₀ n
-      let P37 := proposition_3_7_projection P P
-      { incl := ⟨P37.incl, (conjMap P.incl P.retr).continuous⟩
-        retr := ⟨P37.retr, (conjMap P.retr P.incl).continuous⟩
-        retr_incl := P37.retr_incl
-        incl_retr_le := fun f => ScottMap.le_def.mpr (P37.incl_retr_le f) }
+  | (n + 1) => functionSpaceProjection (towerProj D₀ j₀ n)
 
 theorem towerProj_succ (D₀ : CLat.{u})
     (j₀ : IsContinuousLatticeProjection D₀.carrier (ScottMap D₀.carrier D₀.carrier)) (n : ℕ) :

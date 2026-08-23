@@ -79,3 +79,52 @@ else
   diff -u "${tmp}/challenge.norm" "${tmp}/solution.norm" || true
   exit 1
 fi
+
+# These declarations occur transitively in theorem_4_4 and are intentionally
+# not definition holes: their bodies lock the advertised pointwise lattice,
+# coordinatewise inverse-limit lattice, and recursive projection tower.
+LOCKED_DEFINITIONS=(
+  Scott1972.ContinuousLattice.ScottMap.instPartialOrder
+  Scott1972.ContinuousLattice.ScottMap.sSupMaps
+  Scott1972.ContinuousLattice.ScottMap.instSupSet
+  Scott1972.ContinuousLattice.ScottMap.instCompleteLattice
+  Scott1972.ContinuousLattice.functionSpaceInclFun
+  Scott1972.ContinuousLattice.functionSpaceRetrFun
+  Scott1972.ContinuousLattice.functionSpaceProjection
+  Scott1972.ContinuousLattice.towerProj
+  Scott1972.ContinuousLattice.inverseLimitPartialOrder
+  Scott1972.ContinuousLattice.inverseLimitSInfCoe
+  Scott1972.ContinuousLattice.instInfSetInverseLimit
+  Scott1972.ContinuousLattice.instCompleteLattice
+)
+
+write_definition_dump() {
+  local module="$1" out="$2"
+  {
+    echo "import ${module}"
+    echo "set_option pp.all true"
+    echo "set_option pp.explicit true"
+    echo "set_option pp.universes true"
+    echo "set_option pp.fullNames true"
+    echo "set_option pp.funBinderTypes true"
+    for n in "${LOCKED_DEFINITIONS[@]}"; do
+      echo "#print ${n}"
+    done
+  } >"${out}"
+}
+
+write_definition_dump Challenge "${tmp}/ChallengeDefinitions.lean"
+write_definition_dump Solution "${tmp}/SolutionDefinitions.lean"
+lake env lean "${tmp}/ChallengeDefinitions.lean" 2>/dev/null \
+  | grep -vE 'LEAN_PATH|trace:|warning:|declaration uses' \
+  >"${tmp}/challenge-definitions.txt" || true
+lake env lean "${tmp}/SolutionDefinitions.lean" 2>/dev/null \
+  | grep -vE 'LEAN_PATH|trace:|warning:|declaration uses' \
+  >"${tmp}/solution-definitions.txt" || true
+
+if diff -u "${tmp}/challenge-definitions.txt" "${tmp}/solution-definitions.txt"; then
+  echo "OK: concrete lattice and projection-tower definition bodies match."
+else
+  echo "FAIL: a concrete definition body differs — Comparator will reject its transitive use."
+  exit 1
+fi

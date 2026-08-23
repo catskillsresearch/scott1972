@@ -246,9 +246,18 @@ theorem pointwise_sSup_preservesDirectedSup (F : Set (ScottMap D D')) :
     exact le_trans (ScottMap.monotone f (le_sSup hsS))
       (le_sSup (Set.mem_image_of_mem (fun g : ScottMap D D' => (g : D → D') (sSup S)) hfF))
 
-noncomputable def sSupMaps (F : Set (ScottMap D D')) : ScottMap D D' :=
+/-- The pointwise supremum function is Scott-continuous. Kept as a named
+proof boundary so the Challenge fixes the function while leaving this proof open. -/
+theorem sSupMaps_continuous {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] (F : Set (ScottMap D D')) :
+    @Continuous D D' scottTopologicalSpace scottTopologicalSpace
+      (fun x => sSup (Set.image (fun f : ScottMap D D' => (f : D → D') x) F)) :=
+  continuous_of_preservesDirectedSup (pointwise_sSup_preservesDirectedSup F)
+
+noncomputable def sSupMaps {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] (F : Set (ScottMap D D')) : ScottMap D D' :=
   ⟨fun x => sSup (Set.image (fun f : ScottMap D D' => (f : D → D') x) F),
-    continuous_of_preservesDirectedSup (pointwise_sSup_preservesDirectedSup F)⟩
+    sSupMaps_continuous F⟩
 
 theorem sSupMaps_apply (F : Set (ScottMap D D')) (x : D) :
     (sSupMaps F : D → D') x =
@@ -262,7 +271,8 @@ since directed *and* arbitrary suprema of Scott maps are computed pointwise — 
 `completeLatticeOfSup` this is a complete lattice. Note infima are *not* pointwise (Scott's
 warning); `completeLatticeOfSup` derives them as `sSup` of lower bounds. -/
 
-instance instPartialOrder : PartialOrder (ScottMap D D') where
+instance instPartialOrder {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] : PartialOrder (ScottMap D D') where
   le := ScottMap.le
   le_refl _ _ := le_refl _
   le_trans _ _ _ hfg hgh x := le_trans (hfg x) (hgh x)
@@ -270,14 +280,17 @@ instance instPartialOrder : PartialOrder (ScottMap D D') where
 
 theorem le_def {f g : ScottMap D D'} : f ≤ g ↔ ∀ x, (f : D → D') x ≤ g x := Iff.rfl
 
-noncomputable instance instSupSet : SupSet (ScottMap D D') := ⟨sSupMaps⟩
+noncomputable instance instSupSet {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] : SupSet (ScottMap D D') := ⟨sSupMaps⟩
 
 theorem sSup_apply (F : Set (ScottMap D D')) (x : D) :
     ((sSup F : ScottMap D D') : D → D') x =
       sSup (Set.image (fun f : ScottMap D D' => (f : D → D') x) F) :=
   rfl
 
-theorem isLUB_sSup (F : Set (ScottMap D D')) : IsLUB F (sSup F) := by
+theorem isLUB_sSup {D : Type u} {D' : Type v}
+    [CompleteLattice D] [CompleteLattice D'] (F : Set (ScottMap D D')) :
+    IsLUB F (sSup F) := by
   constructor
   · intro f hf
     rw [le_def]
