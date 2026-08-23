@@ -1,0 +1,15 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "Scott1972.ContinuousLattice.exists_scott_domain_domain_equation"
+  ],
+  "definition_names": [
+    "Scott1972.ContinuousLattice.ScottOpen",
+    "Scott1972.ContinuousLattice.WayBelow",
+    "Scott1972.ContinuousLattice.IsContinuousLattice",
+    "Scott1972.ContinuousLattice.scottTopologicalSpace",
+    "Scott1972.ContinuousLattice.ScottMap"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"]
+}

@@ -59,17 +59,17 @@ theorem continuous_of_preservesDirectedSup {f : D → D'} (hf : PreservesDirecte
 theorem continuous_preservesDirectedSup {f : D → D'}
     (hf : @Continuous D D' scottTopologicalSpace scottTopologicalSpace f) :
     PreservesDirectedSup f := by
-  have hf' :
-      @Continuous (WithScott D) (WithScott D') _ _ (WithScott.toScott ∘ f ∘ WithScott.ofScott) := by
-    simpa [WithScott.toScott, WithScott.ofScott] using hf
-  have hsc : ScottContinuous (WithScott.toScott ∘ f ∘ WithScott.ofScott) :=
+  have hD : @IsScott D univ _ (Topology.scott D univ) :=
+    @IsScott.mk D univ _ (Topology.scott D univ) rfl
+  have hD' : @IsScott D' univ _ (Topology.scott D' univ) :=
+    @IsScott.mk D' univ _ (Topology.scott D' univ) rfl
+  have hsc : ScottContinuous f :=
     scottContinuousOn_univ.1 <|
-      (Topology.IsScott.scottContinuousOn_iff_continuous (α := WithScott D) (D := univ)
-        (fun _ _ _ => trivial)).2 hf'
+      (@Topology.IsScott.scottContinuousOn_iff_continuous D D' _
+        (Topology.scott D univ) _ (Topology.scott D' univ) hD' f univ hD
+        (fun _ _ _ => trivial)).2 hf
   intro S hS hSdir
-  have h := hsc hS hSdir (isLUB_sSup S)
-  simp only [Function.comp_def, WithScott.toScott, WithScott.ofScott] at h
-  exact h.sSup_eq.symm
+  exact (hsc hS hSdir (isLUB_sSup S)).sSup_eq.symm
 
 /-- **Scott 1972, Proposition 2.5.** Scott continuity ↔ preservation of directed suprema. -/
 theorem proposition_2_5 (f : D → D') :

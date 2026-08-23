@@ -1089,7 +1089,7 @@ composition identities (`projInfInf_comp_embInfInf`, `embInfInf_comp_projInfInf`
 or `arxiv.tex` (they inline Lean sources and mermaid figures for review/PDF packaging and are
 stale whenever older than `arxiv.md` or any listed `.lean` file).
 
-The repository pins Lean / mathlib **v4.30.0** (`lean-toolchain`).
+The repository pins Lean / mathlib **v4.33.0** (`lean-toolchain`).
 
 ```bash
 lake exe cache get

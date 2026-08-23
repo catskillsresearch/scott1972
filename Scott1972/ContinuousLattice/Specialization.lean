@@ -65,11 +65,10 @@ theorem ScottOpen_iff_dirSupInacc {U : Set D} : ScottOpen U ↔ IsUpperSet U ∧
 
 theorem isOpen_iff_scottOpen {U : Set D} : @IsOpen D scottTopologicalSpace U ↔ ScottOpen U := by
   rw [ScottOpen_iff_dirSupInacc, scottTopologicalSpace]
-  haveI : IsScott (WithScott D) univ := inferInstance
-  rw [show @IsOpen D (Topology.scott D univ) U = @IsOpen (WithScott D) inferInstance U from rfl,
-    IsScott.isOpen_iff_isUpperSet_and_dirSupInaccOn (α := WithScott D) (D := univ),
-    dirSupInaccOn_univ]
-  rfl
+  have hinst : @IsScott D univ _ (Topology.scott D univ) :=
+    @IsScott.mk D univ _ (Topology.scott D univ) rfl
+  simpa [dirSupInaccOn_univ] using
+    @IsScott.isOpen_iff_isUpperSet_and_dirSupInaccOn D univ _ (Topology.scott D univ) U hinst
 
 /-- Scott-open sets in our sense agree with mathlib's Scott topology (alias). -/
 theorem isOpen_scott_iff_scottOpen {U : Set D} :

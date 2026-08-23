@@ -1,7 +1,9 @@
 name = "scott1972"
 version = "0.1.0"
 keywords = ["domain-theory", "scott-1972", "continuous-lattices", "lean4"]
-defaultTargets = ["Scott1972"]
+defaultTargets = ["Scott1972", "Challenge", "Solution"]
+
+# Scott1972 is the proof development. Challenge / Solution are the Palomar Comparator pair.
 
 [leanOptions]
 pp.unicode.fun = true
@@ -10,7 +12,13 @@ relaxedAutoImplicit = true
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.30.0"
+rev = "v4.33.0"
 
 [[lean_lib]]
 name = "Scott1972"
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
