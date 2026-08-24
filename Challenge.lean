@@ -203,7 +203,8 @@ def functionSpaceInclFun {D D' : Type u} [CompleteLattice D] [CompleteLattice D'
     (P : IsContinuousLatticeProjection D D') (f : ScottMap D D) : ScottMap D' D' :=
   ⟨fun x => P.incl (f (P.retr x)), functionSpaceInclFun_continuous P f⟩
 
-/-- Continuity, in the pointwise function-space topology, of `f ↦ i ∘ f ∘ j`. -/
+/-- Continuity, for the lattice Scott topologies on the function spaces, of
+`f ↦ i ∘ f ∘ j`. -/
 theorem functionSpaceInclFun_outer_continuous {D D' : Type u}
     [CompleteLattice D] [CompleteLattice D']
     (P : IsContinuousLatticeProjection D D') :
@@ -224,7 +225,8 @@ def functionSpaceRetrFun {D D' : Type u} [CompleteLattice D] [CompleteLattice D'
     (P : IsContinuousLatticeProjection D D') (g : ScottMap D' D') : ScottMap D D :=
   ⟨fun x => P.retr (g (P.incl x)), functionSpaceRetrFun_continuous P g⟩
 
-/-- Continuity, in the pointwise function-space topology, of `g ↦ j ∘ g ∘ i`. -/
+/-- Continuity, for the lattice Scott topologies on the function spaces, of
+`g ↦ j ∘ g ∘ i`. -/
 theorem functionSpaceRetrFun_outer_continuous {D D' : Type u}
     [CompleteLattice D] [CompleteLattice D']
     (P : IsContinuousLatticeProjection D D') :
