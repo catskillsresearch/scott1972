@@ -126,13 +126,18 @@ theorem le_antisymm' (f g : ScottMap D D') (hfg : le f g) (hgf : le g f) :
     f = g := by
   sorry
 
+/-- Strict pointwise order induced by `ScottMap.le`. -/
+def lt (f g : ScottMap D D') : Prop :=
+  le f g ∧ ¬ le g f
+
 /-- The chosen strict pointwise order is `≤ ∧ ¬ ≥`. -/
 theorem lt_iff_le_not_ge' (f g : ScottMap D D') :
-    (le f g ∧ ¬ le g f) ↔ le f g ∧ ¬ le g f := by
+    lt f g ↔ le f g ∧ ¬ le g f := by
   sorry
 
 instance instPartialOrder : PartialOrder (ScottMap D D') where
   le := le
+  lt := lt
   le_refl := le_refl'
   le_trans := le_trans'
   lt_iff_le_not_ge := lt_iff_le_not_ge'

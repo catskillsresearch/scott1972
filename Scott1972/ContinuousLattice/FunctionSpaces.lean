@@ -295,16 +295,22 @@ theorem le_antisymm' {D : Type u} {D' : Type v}
     (hgf : ScottMap.le g f) : f = g :=
   ScottMap.ext fun x => le_antisymm (hfg x) (hgf x)
 
+/-- Strict pointwise order induced by `ScottMap.le`. -/
+def lt {D : Type u} {D' : Type v} [CompleteLattice D] [CompleteLattice D']
+    (f g : ScottMap D D') : Prop :=
+  ScottMap.le f g ∧ ¬ ScottMap.le g f
+
 /-- The chosen strict pointwise order is `≤ ∧ ¬ ≥`. -/
 theorem lt_iff_le_not_ge' {D : Type u} {D' : Type v}
     [CompleteLattice D] [CompleteLattice D'] (f g : ScottMap D D') :
-    (ScottMap.le f g ∧ ¬ ScottMap.le g f) ↔
+    ScottMap.lt f g ↔
       ScottMap.le f g ∧ ¬ ScottMap.le g f :=
   Iff.rfl
 
 instance instPartialOrder {D : Type u} {D' : Type v}
     [CompleteLattice D] [CompleteLattice D'] : PartialOrder (ScottMap D D') where
   le := ScottMap.le
+  lt := ScottMap.lt
   le_refl := le_refl'
   le_trans := le_trans'
   lt_iff_le_not_ge := lt_iff_le_not_ge'

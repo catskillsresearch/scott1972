@@ -238,8 +238,9 @@ alignment:
       status: proved
       note: >-
         Comparator checks the concrete body generated from pointwise order
-        and pointwise arbitrary suprema. Only continuity and least-upper-bound
-        proof obligations are theorem holes in Challenge.
+        (including its explicitly defined strict relation) and pointwise arbitrary
+        suprema. The pointwise order laws, strict-order characterization,
+        continuity, and least-upper-bound obligations are theorem holes in Challenge.
 
     - source: "Scott 1972, §2: induced (Scott) topology on a lattice"
       lean: "scottTopologicalSpace"
