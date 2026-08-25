@@ -1,5 +1,6 @@
 [![Lean 4](https://img.shields.io/github/actions/workflow/status/catskillsresearch/scott1972/build.yml?label=Lean%204)](https://github.com/catskillsresearch/scott1972/actions/workflows/build.yml)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.30782-b31b1b.svg)](https://arxiv.org/abs/2606.30782)
+[![Palomar](https://img.shields.io/badge/Palomar-2026--08--24--000003-0f766e.svg)](https://palomar-registry.org/entry?id=PALOMAR-2026-08-24-000003&version=2)
 
 # scott1972
 
