@@ -23,5 +23,6 @@ the product/subspace inverse-limit topology and the pointwise Pi topology on
 the function space. The proof uses Scott's displayed `i∞`/`j∞` formulas. The
 full §2–§4 development lives in `Scott1972/ContinuousLattice/*`.
 
-Palomar reviews and, if registered, preserves a pinned commit of *this*
-repository.
+This formalization is registered in the Palomar registry as
+[PALOMAR-2026-08-24-000003](https://palomar-registry.org/entry?id=PALOMAR-2026-08-24-000003&version=2)
+(version 2). Palomar preserves a pinned commit of *this* repository.

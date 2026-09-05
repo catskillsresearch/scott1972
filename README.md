@@ -10,8 +10,10 @@ Lean 4 formalization of Dana Scott's **1972** *Continuous Lattices* (LNM 274):
 injective `T₀`-spaces, Scott topology, way-below, function spaces, inverse limits.
 
 Standalone package — no dependency on the 1980/1982 formalizations. Cross-presentation
-equivalence theorems live in [`scott_models`](../scott_models); this repo is submitted
-to [Palomar](https://palomar-registry.org/about) on its own (see `PROVENANCE.md`).
+equivalence theorems live in [`scott_models`](../scott_models); this repo is registered
+with [Palomar](https://palomar-registry.org/about) on its own as
+[PALOMAR-2026-08-24-000003](https://palomar-registry.org/entry?id=PALOMAR-2026-08-24-000003&version=2)
+(see `PROVENANCE.md`).
 
 The pin is `leanprover/lean4:v4.33.0` (same as [`qlambda`](../qlambda)).
 
